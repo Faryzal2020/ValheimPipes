@@ -15,7 +15,7 @@ namespace ValheimHopper.Logic {
         private Container container;
         private ContainerTarget containerTarget;
         private List<IPushTarget> pushTo = new List<IPushTarget>();
-        private List<Hopper> nearHoppers = new List<Hopper>();
+        private int lastPullFrame = -1;
 
         private const float TransferInterval = 0.2f;
         private const float ObjectSearchInterval = 3f;
@@ -69,65 +69,40 @@ namespace ValheimHopper.Logic {
         }
 
         public IEnumerable<ItemDrop.ItemData> GetItems() {
+            int frame = HopperHelper.GetFixedFrameCount();
+            if (frame == lastPullFrame) {
+                return Enumerable.Empty<ItemDrop.ItemData>();
+            }
             return containerTarget.GetItems();
         }
 
         public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender) {
+            lastPullFrame = HopperHelper.GetFixedFrameCount();
             containerTarget.RemoveItem(item, destination, destinationPos, sender);
         }
 
         private void PushItems() {
-            var activePullers = nearHoppers.Where(hopper => hopper.pullFrom.Exists(p => p.NetworkHashCode() == this.NetworkHashCode())).ToList();
-            int totalBranches = pushTo.Count + activePullers.Count;
-
-            if (totalBranches == 0) {
+            if (pushTo.Count == 0 || container.GetInventory().NrOfItems() == 0) {
                 return;
             }
 
-            if (container.GetInventory().NrOfItems() == 0) {
+            IPushTarget to = pushTo[OutputCounter % pushTo.Count];
+            OutputCounter++;
+
+            if (!to.IsValid()) {
                 return;
             }
 
-            int currentTurn = OutputCounter % totalBranches;
+            ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i));
 
-            if (currentTurn < pushTo.Count) {
-                IPushTarget to = pushTo[currentTurn];
-                if (!to.IsValid()) {
-                    OutputCounter++;
-                    return;
-                }
-
-                ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i));
-
-                if (item != null) {
-                    to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
-                    OutputCounter++;
-                } else {
-                    OutputCounter++; // Target rejects all items (full/filter)
-                }
-            } else {
-                int pullerIndex = currentTurn - pushTo.Count;
-                Hopper hopper = activePullers[pullerIndex];
-                
-                if (!hopper.IsValid()) {
-                    OutputCounter++;
-                    return;
-                }
-
-                ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => hopper.CanAddItem(i));
-                if (item != null) {
-                    hopper.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
-                    OutputCounter++;
-                } else {
-                    OutputCounter++; // Hopper full/filter rejects
-                }
+            if (item != null) {
+                to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
             }
         }
 
         private void FindIO() {
             Quaternion rotation = transform.rotation;
             pushTo = HopperHelper.FindTargets<IPushTarget>(transform.TransformPoint(outPos), outSize, rotation, i => i.PushPriority, this);
-            nearHoppers = HopperHelper.FindTargets<Hopper>(transform.position, Vector3.one * 3f, rotation, i => i.PullPriority, this);
         }
 
         private void OnDrawGizmos() {
