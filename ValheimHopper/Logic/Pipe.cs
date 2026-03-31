@@ -24,7 +24,6 @@ namespace ValheimHopper.Logic {
         private int objectSearchFrame;
         private int frameOffset;
 
-        private int pushCounter;
 
         protected override void Awake() {
             base.Awake();
@@ -75,35 +74,59 @@ namespace ValheimHopper.Logic {
 
         public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender) {
             containerTarget.RemoveItem(item, destination, destinationPos, sender);
-        }
-
-        private bool CanPushItem(ItemDrop.ItemData item) {
-            return !nearHoppers.Any(hopper => hopper.pullFrom.Contains(this) && hopper.CanAddItem(item));
+            OutputCounter++; // Increment branch turn on passive pull
         }
 
         private void PushItems() {
-            if (pushTo.Count == 0) {
+            var activePullers = nearHoppers.Where(hopper => hopper.pullFrom.Exists(p => p.NetworkHashCode() == this.NetworkHashCode())).ToList();
+            int totalBranches = pushTo.Count + activePullers.Count;
+
+            if (totalBranches == 0) {
                 return;
             }
 
-            IPushTarget to = pushTo[pushCounter % pushTo.Count];
-            pushCounter++;
-
-            if (!to.IsValid()) {
+            if (container.GetInventory().NrOfItems() == 0) {
                 return;
             }
 
-            ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i) && CanPushItem(i));
+            int currentTurn = OutputCounter % totalBranches;
 
-            if (item != null) {
-                to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
+            if (currentTurn < pushTo.Count) {
+                IPushTarget to = pushTo[currentTurn];
+                if (!to.IsValid()) {
+                    OutputCounter++;
+                    return;
+                }
+
+                ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i));
+
+                if (item != null) {
+                    to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
+                    OutputCounter++;
+                } else {
+                    OutputCounter++; // Target rejects all items (full/filter)
+                }
+            } else {
+                int pullerIndex = currentTurn - pushTo.Count;
+                Hopper hopper = activePullers[pullerIndex];
+                
+                if (!hopper.IsValid()) {
+                    OutputCounter++;
+                    return;
+                }
+
+                ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => hopper.CanAddItem(i));
+                if (item == null) {
+                    OutputCounter++; // Hopper full/filter rejects
+                }
+                // Else: we stall push and let Hopper pull to complete the turn.
             }
         }
 
         private void FindIO() {
             Quaternion rotation = transform.rotation;
             pushTo = HopperHelper.FindTargets<IPushTarget>(transform.TransformPoint(outPos), outSize, rotation, i => i.PushPriority, this);
-            nearHoppers = HopperHelper.FindTargets<Hopper>(transform.position, Vector3.one * 1.5f, rotation, i => i.PullPriority, this);
+            nearHoppers = HopperHelper.FindTargets<Hopper>(transform.position, Vector3.one * 3f, rotation, i => i.PullPriority, this);
         }
 
         private void OnDrawGizmos() {

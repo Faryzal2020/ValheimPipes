@@ -21,7 +21,7 @@ namespace ValheimHopper.Logic {
         [SerializeField] private Vector3 outPos = new Vector3(0, -0.25f * 1.5f, 0);
         [SerializeField] private Vector3 inSize = new Vector3(1f, 1f, 1f);
         [SerializeField] private Vector3 outSize = new Vector3(1f, 1f, 1f);
-        [SerializeField] private Vector3 nearSize = new Vector3(1.5f, 1.5f, 1.5f);
+        [SerializeField] private Vector3 nearSize = new Vector3(3f, 3f, 3f);
 
         private List<IPushTarget> pushTo = new List<IPushTarget>();
         internal List<IPullTarget> pullFrom = new List<IPullTarget>();
@@ -34,7 +34,6 @@ namespace ValheimHopper.Logic {
         private int objectSearchFrame;
         private int frameOffset;
 
-        private int pushCounter;
         private int pullCounter;
 
         public ItemFilter filter;
@@ -136,25 +135,52 @@ namespace ValheimHopper.Logic {
         }
 
         private void PushItems() {
-            if (pushTo.Count == 0) {
+            var activePullers = nearHoppers.Where(hopper => hopper != this && hopper.pullFrom.Exists(p => p.NetworkHashCode() == this.NetworkHashCode())).ToList();
+            int totalBranches = pushTo.Count + activePullers.Count;
+
+            if (totalBranches == 0) {
                 if (DropItemsOption.Get()) {
                     DropItem();
                 }
-
                 return;
             }
 
-            IPushTarget to = pushTo[pushCounter % pushTo.Count];
-            pushCounter++;
-
-            if (!to.IsValid()) {
-                return;
+            bool havePushableItems = container.GetInventory().GetAllItems().Any(CanPushItem);
+            if (!havePushableItems) {
+                return; // Wait until we actually have an item ready to push.
             }
 
-            ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i) && CanPushItem(i));
+            int currentTurn = OutputCounter % totalBranches;
 
-            if (item != null) {
-                to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
+            if (currentTurn < pushTo.Count) {
+                IPushTarget to = pushTo[currentTurn];
+                if (!to.IsValid()) {
+                    OutputCounter++;
+                    return;
+                }
+
+                ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i) && CanPushItem(i));
+
+                if (item != null) {
+                    to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
+                    OutputCounter++;
+                } else {
+                    OutputCounter++; // Target full/filtered, skip.
+                }
+            } else {
+                int pullerIndex = currentTurn - pushTo.Count;
+                Hopper hopper = activePullers[pullerIndex];
+
+                if (!hopper.IsValid()) {
+                    OutputCounter++;
+                    return;
+                }
+
+                ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => hopper.CanAddItem(i) && CanPushItem(i));
+                if (item == null) {
+                    OutputCounter++; // Puller hopper full/filtered, skip.
+                }
+                // Else: we stall the push and wait for the hopper to pull!
             }
         }
 
@@ -186,6 +212,7 @@ namespace ValheimHopper.Logic {
 
         public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender) {
             containerTarget.RemoveItem(item, destination, destinationPos, sender);
+            OutputCounter++; // Increment branch cycle on passive pull
         }
 
         private bool FindFreeSlot(ItemDrop.ItemData itemToAdd, out Vector2i pos) {
@@ -230,8 +257,7 @@ namespace ValheimHopper.Logic {
         }
 
         private bool CanPushItem(ItemDrop.ItemData item) {
-            return (!LeaveLastItemOption.Get() || container.GetInventory().CountItems(item.m_shared.m_name) > 1) &&
-                   !nearHoppers.Any(hopper => hopper != this && hopper.pullFrom.Contains(this) && hopper.CanAddItem(item));
+            return (!LeaveLastItemOption.Get() || container.GetInventory().CountItems(item.m_shared.m_name) > 1);
         }
 
         private void FindIO() {

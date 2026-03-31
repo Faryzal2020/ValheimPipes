@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
@@ -19,9 +19,12 @@ namespace ValheimHopper {
     public class Plugin : BaseUnityPlugin {
         [PublicAPI] public const string ModName = "ItemHopper";
         [PublicAPI] public const string ModGuid = "com.maxsch.valheim.ItemHopper";
-        [PublicAPI] public const string ModVersion = "2.0.0";
+        [PublicAPI] public const string ModVersion = "2.0.1";
 
         private static ConfigEntry<bool> addSmelterSnappoints;
+        private static ConfigEntry<bool> debugLogs;
+        public static ConfigEntry<bool> SyncOutputCounter;
+
 
         public static Plugin Instance { get; private set; }
         public static AssetBundle AssetBundle { get; private set; }
@@ -35,6 +38,9 @@ namespace ValheimHopper {
             harmony.PatchAll();
 
             addSmelterSnappoints = Config.Bind("General", "Add Smelter Snappoints", true, "Adds snappoints to inputs/outputs of the smelter, charcoal kiln, blastfurnace, windmill and spinning wheel. Requires a restart to take effect.");
+            debugLogs = Config.Bind("General", "Debug Logs", false, "Enable debug logging.");
+            SyncOutputCounter = Config.Bind("General", "Sync Output Counter", false, "Synchronizes the round-robin output cycle of pipes and hoppers between clients using ZDO.");
+
 
             CustomLocalization localization = LocalizationManager.Instance.GetLocalization();
             localization.AddJsonFile("English", AssetUtils.LoadTextFromResources("Localization.English.json"));
@@ -121,6 +127,12 @@ namespace ValheimHopper {
             };
 
             PieceManager.Instance.AddPiece(new CustomPiece(AssetBundle, assetName, true, config));
+        }
+
+        public static void Debug(object data) {
+            if (debugLogs != null && debugLogs.Value) {
+                Jotunn.Logger.LogInfo(data);
+            }
         }
     }
 }

@@ -5,6 +5,22 @@ using ValheimHopper.Logic.Helper;
 namespace ValheimHopper.Logic {
     public class NetworkPiece : MonoBehaviour {
         protected ZNetView zNetView;
+        private int localOutputCounter = 0;
+
+        protected int OutputCounter {
+            get {
+                if (zNetView && zNetView.IsValid() && Plugin.SyncOutputCounter.Value) {
+                    return zNetView.GetZDO().GetInt("hopper_output_counter", localOutputCounter);
+                }
+                return localOutputCounter;
+            }
+            set {
+                if (zNetView && zNetView.IsValid() && Plugin.SyncOutputCounter.Value) {
+                    zNetView.GetZDO().Set("hopper_output_counter", value);
+                }
+                localOutputCounter = value;
+            }
+        }
 
         protected virtual void Awake() {
             zNetView = GetComponentInParent<ZNetView>();

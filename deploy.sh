@@ -1,86 +1,96 @@
+#!/bin/bash
+
+# Configuration
 ModName="ValheimHopper"
 ModNameUnity="UnityValheimHopper"
+Configuration="Debug"
+TargetFramework="net472"
+OutputDir="$ModName/bin/$Configuration/$TargetFramework"
 
-# function for xml reading
+# Stop early if build output is missing
+if [ ! -f "$OutputDir/$ModName.dll" ]; then
+    echo "Output DLL not found. Run 'dotnet build' before deploying."
+    exit 1
+fi
+
+# Function for XML reading
 read_dom () {
     local IFS=\>
     read -d \< ENTITY CONTENT
 }
 
-# read install folder from environment
-while read_dom; do
-	if [[ $ENTITY = "VALHEIM_INSTALL" ]]; then
-		VALHEIM_INSTALL=$CONTENT
-	fi
-	if [[ $ENTITY = "R2MODMAN_INSTALL" ]]; then
-		R2MODMAN_INSTALL=$CONTENT
-	fi
-	if [[ $ENTITY = "USE_R2MODMAN_AS_DEPLOY_FOLDER" ]]; then
-		USE_R2MODMAN_AS_DEPLOY_FOLDER=$CONTENT
-	fi
-done < Environment.props
-
-# set ModDir
-if $USE_R2MODMAN_AS_DEPLOY_FOLDER; then
-  BepInExFolder="$R2MODMAN_INSTALL/BepInEx"
-else
-	BepInExFolder="$VALHEIM_INSTALL/BepInEx"
+# Optional: Read install folder from environment (for local deployment)
+if [ -f Environment.props ]; then
+    while read_dom; do
+        if [[ $ENTITY = "VALHEIM_INSTALL" ]]; then
+            VALHEIM_INSTALL=$CONTENT
+        fi
+        if [[ $ENTITY = "R2MODMAN_INSTALL" ]]; then
+            R2MODMAN_INSTALL=$CONTENT
+        fi
+        if [[ $ENTITY = "USE_R2MODMAN_AS_DEPLOY_FOLDER" ]]; then
+            USE_R2MODMAN_AS_DEPLOY_FOLDER=$CONTENT
+        fi
+    done < Environment.props
 fi
 
-PluginFolder="$BepInExFolder/plugins"
-ModDir="$PluginFolder/$ModName"
+# Deploy to local game folder if configuration exists
+if [[ -n "$VALHEIM_INSTALL" ]] || [[ -n "$R2MODMAN_INSTALL" ]]; then
+    if [[ "$USE_R2MODMAN_AS_DEPLOY_FOLDER" == "true" ]]; then
+      BepInExFolder="$R2MODMAN_INSTALL/BepInEx"
+    else
+        BepInExFolder="$VALHEIM_INSTALL/BepInEx"
+    fi
 
-# copy to unity
+    PluginFolder="$BepInExFolder/plugins"
+    ModDir="$PluginFolder/$ModName"
+
+    echo "Deploying to local game folder: $ModDir"
+    mkdir -p "$ModDir"
+    cp "$OutputDir/$ModName.dll" "$ModDir"
+    cp "$OutputDir/$ModName.pdb" "$ModDir"
+    cp README.md "$ModDir"
+    cp CHANGELOG.md "$ModDir"
+    cp manifest.json "$ModDir"
+    cp icon.png "$ModDir"
+fi
+
+# Prepare the Unity Project context
+echo "Copying dependencies to $ModNameUnity/Assets/Assemblies"
 mkdir -p "$ModNameUnity/Assets/Assemblies"
 mkdir -p "$ModNameUnity/AssetBundles/StandaloneWindows"
 
-cp "$ModName/bin/Debug/$ModName.dll" "$ModNameUnity/Assets/Assemblies"
+# Copy all resolved dependencies from the project's build output to the Unity Asset folder
+# This completely replaces the old hardcoded VALHEIM_INSTALL copies since NuGet handles it
+cp -r $OutputDir/*.dll "$ModNameUnity/Assets/Assemblies/" 2>/dev/null
 
-cp "$BepInExFolder/core/BepInEx.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$BepInExFolder/core/0Harmony.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$BepInExFolder/core/Mono.Cecil.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$BepInExFolder/core/MonoMod.Utils.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$BepInExFolder/core/MonoMod.RuntimeDetour.dll" "$ModNameUnity/Assets/Assemblies"
-[ -f "$PluginFolder/MSchmoecker-MultiUserChest/MultiUserChest.dll" ] && cp "$PluginFolder/MSchmoecker-MultiUserChest/MultiUserChest.dll" "$ModNameUnity/Assets/Assemblies"
-[ -f "$PluginFolder/MultiUserChest/MultiUserChest.dll" ] && cp "$PluginFolder/MultiUserChest/MultiUserChest.dll" "$ModNameUnity/Assets/Assemblies"
-[ -f "$PluginFolder/ValheimModding-Jotunn/Jotunn.dll" ] && cp "$PluginFolder/ValheimModding-Jotunn/Jotunn.dll" "$ModNameUnity/Assets/Assemblies"
-[ -f "$PluginFolder/Jotunn/Jotunn.dll" ] && cp "$PluginFolder/Jotunn/Jotunn.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/assembly_valheim.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/assembly_utils.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/assembly_postprocessing.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/assembly_sunshafts.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/assembly_guiutils.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/assembly_googleanalytics.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/PlayFab.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/PlayFabParty.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/PlatformTools.Core.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/PlatformTools.Common.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/ConnectedStorage.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/gui_framework.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/com.rlabrecque.steamworks.net.dll" "$ModNameUnity/Assets/Assemblies"
-cp "$VALHEIM_INSTALL/valheim_Data/Managed/SoftReferenceableAssets.dll" "$ModNameUnity/Assets/Assemblies"
+# Clean up older debugging artifacts like .mdb
+[ -f "$ModNameUnity/Assets/Assemblies/$ModName.dll.mdb" ] && rm "$ModNameUnity/Assets/Assemblies/$ModName.dll.mdb"
 
-echo Coping to: "$ModDir"
+# Make release zip files 
+echo "Creating release zip files..."
 
-# copy content
-mkdir -p "$ModDir"
-cp "$ModName/bin/Debug/$ModName.dll" "$ModDir"
-cp "$ModName/bin/Debug/$ModName.dll.mdb" "$ModDir"
-cp README.md "$ModDir"
-cp CHANGELOG.md "$ModDir"
-cp manifest.json "$ModDir"
-cp icon.png "$ModDir"
+DistDir="dist"
+mkdir -p "$DistDir/$ModName/plugins"
 
-# make zip files
-cd "$ModDir" || exit
+# Package standard zip files
+cp "$OutputDir/$ModName.dll" "$DistDir/$ModName"
+cp "$OutputDir/$ModName.pdb" "$DistDir/$ModName"
+cp README.md "$DistDir/$ModName"
+cp CHANGELOG.md "$DistDir/$ModName"
+cp manifest.json "$DistDir/$ModName"
+cp icon.png "$DistDir/$ModName"
 
-[ -f "$ModName.zip" ] && rm "$ModName.zip"
-[ -f "$ModName-Nexus.zip" ] && rm "$ModName-Nexus.zip"
+# Create the Nexus specific folder struct
+cp "$OutputDir/$ModName.dll" "$DistDir/$ModName/plugins"
+cp "$OutputDir/$ModName.pdb" "$DistDir/$ModName/plugins"
 
-mkdir -p plugins
-cp "$ModName.dll" "$ModName.dll.mdb" plugins
+cd "$DistDir/$ModName" || exit
 
-zip "$ModName.zip" "$ModName.dll" "$ModName.dll.mdb" README.md CHANGELOG.md manifest.json icon.png
-zip -r "$ModName-Nexus.zip" plugins
+zip "../$ModName.zip" "$ModName.dll" "$ModName.pdb" README.md CHANGELOG.md manifest.json icon.png
+zip -r "../$ModName-Nexus.zip" plugins
 
-rm -r plugins
+cd ../../
+rm -r "$DistDir/$ModName"
+
+echo "Done! Zip files are located in the dist/ folder."
