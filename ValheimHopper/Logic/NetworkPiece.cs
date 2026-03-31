@@ -31,7 +31,10 @@ namespace ValheimHopper.Logic {
         }
 
         public int NetworkHashCode() {
-            return HopperHelper.GetNetworkHashCode(zNetView);
+            if (zNetView && zNetView.m_zdo != null) {
+                return HopperHelper.GetNetworkHashCode(zNetView);
+            }
+            return this.GetInstanceID();
         }
 
         public bool Equals(ITarget x, ITarget y) {

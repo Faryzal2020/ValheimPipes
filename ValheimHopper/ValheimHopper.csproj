@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <PackageReference Include="JotunnLib" Version="2.24.2" />
-    <PackageReference Include="HarmonyX" Version="2.13.0" />
     <PackageReference Include="ValheimGameLibs" Version="0.221.4" />
   </ItemGroup>
 
