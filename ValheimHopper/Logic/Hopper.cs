@@ -17,6 +17,9 @@ namespace ValheimHopper.Logic {
         public HopperPriority PullPriority { get; } = HopperPriority.HopperPull;
         public bool IsPickup { get; } = false;
 
+        public Vector3 InPos => inPos;
+        public Vector3 InSize => inSize;
+
         [SerializeField] private Vector3 inPos = new Vector3(0, 0.25f * 1.5f, 0);
         [SerializeField] private Vector3 outPos = new Vector3(0, -0.25f * 1.5f, 0);
         [SerializeField] private Vector3 inSize = new Vector3(1f, 1f, 1f);
@@ -26,7 +29,6 @@ namespace ValheimHopper.Logic {
         internal List<IPullTarget> pullFrom = new List<IPullTarget>();
         private int lastPullFrame = -1;
 
-        private const float TransferInterval = 0.2f;
         private const float ObjectSearchInterval = 3f;
 
         private int transferFrame;
@@ -56,9 +58,16 @@ namespace ValheimHopper.Logic {
             PickupItemsOption = new ZBool("hopper_pickup_items", true, zNetView);
             LeaveLastItemOption = new ZBool("hopper_leave_last_item", false, zNetView);
 
-            transferFrame = Mathf.RoundToInt((1f / Time.fixedDeltaTime) * TransferInterval);
+            UpdateTransferRate();
             objectSearchFrame = Mathf.RoundToInt((1f / Time.fixedDeltaTime) * ObjectSearchInterval);
             frameOffset = Mathf.Abs(GetInstanceID() % transferFrame);
+        }
+
+        private void UpdateTransferRate() {
+            float itemsPerMinute = name.Contains("Iron") ? Plugin.IronTransferRate.Value : Plugin.BronzeTransferRate.Value;
+            float interval = 30f / Mathf.Max(1f, itemsPerMinute); // 30 because it pushes every 2 * transferFrame
+            transferFrame = Mathf.RoundToInt(interval / Time.fixedDeltaTime);
+            if (transferFrame < 1) transferFrame = 1;
         }
 
         private void Start() {
@@ -250,6 +259,7 @@ namespace ValheimHopper.Logic {
         private void FindIO() {
             Quaternion rotation = transform.rotation;
             pullFrom = HopperHelper.FindTargets<IPullTarget>(transform.TransformPoint(inPos), inSize, rotation, i => i.PullPriority, this);
+            pullFrom.RemoveAll(i => i is Pipe);
             pushTo = HopperHelper.FindTargets<IPushTarget>(transform.TransformPoint(outPos), outSize, rotation, i => i.PushPriority, this);
             pullFrom.RemoveAll(pull => pushTo.Exists(push => push.NetworkHashCode() == pull.NetworkHashCode()));
         }

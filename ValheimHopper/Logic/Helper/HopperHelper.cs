@@ -46,5 +46,41 @@ namespace ValheimHopper.Logic.Helper {
 
             return targets.OrderByDescending(orderBy).GroupBy(t => t.NetworkHashCode()).Select(t => t.First()).ToList();
         }
+
+        public static float GetIntersectionPercentage(Vector3 boxPos, Vector3 boxSize, Quaternion boxRot, Collider targetCollider) {
+            int samplesPerAxis = 3;
+            int insideCount = 0;
+            int totalCount = samplesPerAxis * samplesPerAxis * samplesPerAxis;
+
+            for (int x = 0; x < samplesPerAxis; x++) {
+                for (int y = 0; y < samplesPerAxis; y++) {
+                    for (int z = 0; z < samplesPerAxis; z++) {
+                        float fx = (x + 0.5f) / samplesPerAxis - 0.5f;
+                        float fy = (y + 0.5f) / samplesPerAxis - 0.5f;
+                        float fz = (z + 0.5f) / samplesPerAxis - 0.5f;
+
+                        Vector3 localPoint = new Vector3(fx * boxSize.x, fy * boxSize.y, fz * boxSize.z);
+                        Vector3 worldPoint = boxPos + boxRot * localPoint;
+
+                        if (IsPointInCollider(worldPoint, targetCollider)) {
+                            insideCount++;
+                        }
+                    }
+                }
+            }
+
+            return (float)insideCount / totalCount;
+        }
+
+        private static bool IsPointInCollider(Vector3 point, Collider collider) {
+            if (collider is BoxCollider box) {
+                Vector3 p = box.transform.InverseTransformPoint(point) - box.center;
+                return Mathf.Abs(p.x) <= box.size.x / 2f &&
+                       Mathf.Abs(p.y) <= box.size.y / 2f &&
+                       Mathf.Abs(p.z) <= box.size.z / 2f;
+            }
+
+            return collider.ClosestPoint(point) == point;
+        }
     }
 }

@@ -23,6 +23,9 @@ namespace ValheimHopper {
 
         private static ConfigEntry<bool> addSmelterSnappoints;
         private static ConfigEntry<bool> debugLogs;
+        public static ConfigEntry<float> BronzeTransferRate;
+        public static ConfigEntry<float> IronTransferRate;
+
 
         public static Plugin Instance { get; private set; }
         public static AssetBundle AssetBundle { get; private set; }
@@ -37,6 +40,10 @@ namespace ValheimHopper {
 
             addSmelterSnappoints = Config.Bind("General", "Add Smelter Snappoints", true, "Adds snappoints to inputs/outputs of the smelter, charcoal kiln, blastfurnace, windmill and spinning wheel. Requires a restart to take effect.");
             debugLogs = Config.Bind("General", "Debug Logs", false, "Enable debug logging.");
+
+            BronzeTransferRate = Config.Bind("General", "Bronze Transfer Rate", 60f, "Items per minute for bronze hoppers and pipes.");
+            IronTransferRate = Config.Bind("General", "Iron Transfer Rate", 120f, "Items per minute for iron hoppers.");
+
 
 
             CustomLocalization localization = LocalizationManager.Instance.GetLocalization();

@@ -17,7 +17,6 @@ namespace ValheimHopper.Logic {
         private List<IPushTarget> pushTo = new List<IPushTarget>();
         private int lastPullFrame = -1;
 
-        private const float TransferInterval = 0.2f;
         private const float ObjectSearchInterval = 3f;
 
         private int transferFrame;
@@ -33,9 +32,16 @@ namespace ValheimHopper.Logic {
             container = GetComponent<Container>();
             containerTarget = GetComponent<ContainerTarget>();
 
-            transferFrame = Mathf.RoundToInt((1f / Time.fixedDeltaTime) * TransferInterval);
+            UpdateTransferRate();
             objectSearchFrame = Mathf.RoundToInt((1f / Time.fixedDeltaTime) * ObjectSearchInterval);
             frameOffset = Mathf.Abs(GetInstanceID() % transferFrame);
+        }
+
+        private void UpdateTransferRate() {
+            float itemsPerMinute = name.Contains("Iron") ? Plugin.IronTransferRate.Value : Plugin.BronzeTransferRate.Value;
+            float interval = 30f / Mathf.Max(1f, itemsPerMinute); // 30 because it pushes every 2 * transferFrame
+            transferFrame = Mathf.RoundToInt(interval / Time.fixedDeltaTime);
+            if (transferFrame < 1) transferFrame = 1;
         }
 
         private void FixedUpdate() {
@@ -110,7 +116,32 @@ namespace ValheimHopper.Logic {
 
         private void FindIO() {
             Quaternion rotation = transform.rotation;
-            pushTo = HopperHelper.FindTargets<IPushTarget>(transform.TransformPoint(outPos), outSize, rotation, i => i.PushPriority, this);
+            List<IPushTarget> targets = HopperHelper.FindTargets<IPushTarget>(transform.TransformPoint(outPos), outSize, rotation, i => i.PushPriority, this);
+            
+            // Collect all nearby hoppers for intersection check
+            Collider[] colliders = Physics.OverlapSphere(transform.position, 2.5f, LayerMask.GetMask("piece", "piece_nonsolid"));
+            foreach (Collider collider in colliders) {
+                Hopper hopper = collider.GetComponentInParent<Hopper>();
+                if (hopper != null && !targets.Any(t => t.NetworkHashCode() == hopper.NetworkHashCode())) {
+                    targets.Add(hopper);
+                }
+            }
+
+            List<IPushTarget> filteredTargets = new List<IPushTarget>();
+            Collider pipeCollider = GetComponentInChildren<Collider>();
+
+            foreach (IPushTarget target in targets) {
+                if (target is Hopper hopper) {
+                    float intersection = HopperHelper.GetIntersectionPercentage(hopper.transform.TransformPoint(hopper.InPos), hopper.InSize, hopper.transform.rotation, pipeCollider);
+                    if (intersection > 0.5f) {
+                        filteredTargets.Add(target);
+                    }
+                } else {
+                    filteredTargets.Add(target);
+                }
+            }
+
+            pushTo = filteredTargets;
         }
 
         private void OnDrawGizmos() {
