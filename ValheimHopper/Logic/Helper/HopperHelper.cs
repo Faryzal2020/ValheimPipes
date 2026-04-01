@@ -6,7 +6,7 @@ using UnityEngine;
 namespace ValheimHopper.Logic.Helper {
     public static class HopperHelper {
         private static readonly Collider[] tempColliders = new Collider[256];
-        private static int PieceMask { get; } = LayerMask.GetMask("piece", "piece_nonsolid");
+        private static int PieceMask { get; } = LayerMask.GetMask("piece", "piece_nonsolid", "Default", "static_solid", "viewblock", "vehicle");
         private static int ItemMask { get; } = LayerMask.GetMask("item");
 
         public static bool IsInRange(Vector3 position, Vector3 target, float range) {
@@ -44,13 +44,19 @@ namespace ValheimHopper.Logic.Helper {
                 targets.AddRange(possibleTargets);
             }
 
+            if (targets.Count == 0 && count > 0) {
+                for (int i = 0; i < count; i++) {
+                    Plugin.Debug($"[{exclude.GetType().Name}] Physical hit: {tempColliders[i].gameObject.name} (Layer: {LayerMask.LayerToName(tempColliders[i].gameObject.layer)})");
+                }
+            }
+
             return targets.OrderByDescending(orderBy).GroupBy(t => t.NetworkHashCode()).Select(t => t.First()).ToList();
         }
 
-        public static float GetIntersectionPercentage(Vector3 boxPos, Vector3 boxSize, Quaternion boxRot, Collider targetCollider) {
+        public static bool BoxIntersectsColliders(Vector3 boxPos, Vector3 boxSize, Quaternion boxRot, Collider[] targetColliders) {
+            // Check if any points of the box are inside any of the colliders
+            // 27 points (3x3x3) should be enough for most pipe/hopper shapes
             int samplesPerAxis = 3;
-            int insideCount = 0;
-            int totalCount = samplesPerAxis * samplesPerAxis * samplesPerAxis;
 
             for (int x = 0; x < samplesPerAxis; x++) {
                 for (int y = 0; y < samplesPerAxis; y++) {
@@ -62,14 +68,23 @@ namespace ValheimHopper.Logic.Helper {
                         Vector3 localPoint = new Vector3(fx * boxSize.x, fy * boxSize.y, fz * boxSize.z);
                         Vector3 worldPoint = boxPos + boxRot * localPoint;
 
-                        if (IsPointInCollider(worldPoint, targetCollider)) {
-                            insideCount++;
+                        if (IsPointInAnyCollider(worldPoint, targetColliders)) {
+                            return true;
                         }
                     }
                 }
             }
 
-            return (float)insideCount / totalCount;
+            return false;
+        }
+
+        private static bool IsPointInAnyCollider(Vector3 point, Collider[] colliders) {
+            foreach (Collider collider in colliders) {
+                if (IsPointInCollider(point, collider)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static bool IsPointInCollider(Vector3 point, Collider collider) {

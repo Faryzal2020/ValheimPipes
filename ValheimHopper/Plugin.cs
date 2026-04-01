@@ -10,6 +10,7 @@ using Jotunn.Utils;
 using Jotunn.Managers;
 using ValheimHopper.Logic.Helper;
 using ValheimHopper.UI;
+using ValheimHopper.Logic;
 
 namespace ValheimHopper {
     [BepInPlugin(ModGuid, ModName, ModVersion)]
@@ -17,14 +18,21 @@ namespace ValheimHopper {
     [BepInDependency("com.maxsch.valheim.MultiUserChest")]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     public class Plugin : BaseUnityPlugin {
-        [PublicAPI] public const string ModName = "ItemHopper";
-        [PublicAPI] public const string ModGuid = "com.maxsch.valheim.ItemHopper";
-        [PublicAPI] public const string ModVersion = "2.0.1";
+        [PublicAPI] public const string ModName = "ValheimPipes";
+        [PublicAPI] public const string ModGuid = "com.faryzal2020.valheim.ValheimPipes";
+        [PublicAPI] public const string ModVersion = "1.0.0";
 
         private static ConfigEntry<bool> addSmelterSnappoints;
         private static ConfigEntry<bool> debugLogs;
         public static ConfigEntry<float> BronzeTransferRate;
         public static ConfigEntry<float> IronTransferRate;
+        public static ConfigEntry<bool> ShowHopperInputBox;
+        public static ConfigEntry<bool> ShowHopperOutputBox;
+        public static ConfigEntry<bool> ShowPipeOutputBox;
+        public static ConfigEntry<bool> ShowSnappointHighlights;
+        public static ConfigEntry<string> ExtraCompatiblePrefabs;
+
+
 
 
         public static Plugin Instance { get; private set; }
@@ -43,6 +51,15 @@ namespace ValheimHopper {
 
             BronzeTransferRate = Config.Bind("General", "Bronze Transfer Rate", 60f, "Items per minute for bronze hoppers and pipes.");
             IronTransferRate = Config.Bind("General", "Iron Transfer Rate", 120f, "Items per minute for iron hoppers.");
+
+            ShowHopperInputBox = Config.Bind("Debug", "Show Hopper Input Box", false, "Show the hopper input bounding box in-game.");
+            ShowHopperOutputBox = Config.Bind("Debug", "Show Hopper Output Box", false, "Show the hopper output bounding box in-game.");
+            ShowPipeOutputBox = Config.Bind("Debug", "Show Pipe Output Box", false, "Show the pipe output bounding box in-game.");
+            ShowSnappointHighlights = Config.Bind("Debug", "Show Snappoint Highlights", false, "Show a visual marker for custom snappoints added by the mod. Requires local restart of the area (teleport or logout) to take effect.");
+
+            ExtraCompatiblePrefabs = Config.Bind("Compatibility", "Extra Compatible Prefabs", "", "A comma-separated list of prefab names to treat as compatible (containers, beehives, smelters, etc.).");
+
+
 
 
 
@@ -95,6 +112,13 @@ namespace ValheimHopper {
                     new Vector3(0f, 1.55f, -1.55f),
                     new Vector3(-0.05f, 0.83f, 2.3f),
                 });
+                SnappointHelper.FixPiece("windmill");
+
+                SnappointHelper.AddSnappoints("piece_oven", new[] {
+                    new Vector3(0f, 1.1f, 2f), // Food
+                    new Vector3(0f, 0.72f, 0.55f), // Fuel
+                });
+                SnappointHelper.FixPiece("piece_oven");
 
                 SnappointHelper.AddSnappoints("piece_spinningwheel", new[] {
                     new Vector3(0.72f, 1.8f, 0f),
@@ -116,7 +140,40 @@ namespace ValheimHopper {
                 Category = "Crafting",
             };
 
-            PieceManager.Instance.AddPiece(new CustomPiece(AssetBundle, assetName, true, config));
+
+            CustomPiece customPiece = new CustomPiece(AssetBundle, assetName, true, config);
+            EnsureCorrectComponent(customPiece);
+            PieceManager.Instance.AddPiece(customPiece);
+        }
+
+        private static void EnsureCorrectComponent(CustomPiece customPiece) {
+            GameObject prefab = customPiece.PiecePrefab;
+            if (prefab.name.Contains("Pipe")) {
+                Hopper hopper = prefab.GetComponent<Hopper>();
+                if (hopper != null) {
+                    // Copy fields before removing
+                    FieldInfo outPosField = typeof(Hopper).GetField("outPos", BindingFlags.NonPublic | BindingFlags.Instance);
+                    FieldInfo outSizeField = typeof(Hopper).GetField("outSize", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                    Vector3 outPos = (Vector3)outPosField.GetValue(hopper);
+                    Vector3 outSize = (Vector3)outSizeField.GetValue(hopper);
+
+                    DestroyImmediate(hopper);
+                    Pipe pipe = prefab.AddComponent<Pipe>();
+
+                    // Set Pipe fields
+                    FieldInfo pipeOutPosField = typeof(Pipe).GetField("outPos", BindingFlags.NonPublic | BindingFlags.Instance);
+                    FieldInfo pipeOutSizeField = typeof(Pipe).GetField("outSize", BindingFlags.NonPublic | BindingFlags.Instance);
+                    
+                    if (pipeOutPosField != null) pipeOutPosField.SetValue(pipe, outPos);
+                    if (pipeOutSizeField != null) pipeOutSizeField.SetValue(pipe, outSize);
+                }
+            } else if (prefab.name.Contains("Hopper") && prefab.GetComponent<Hopper>() == null) {
+                prefab.AddComponent<Hopper>();
+                if (prefab.GetComponent<Pipe>() != null) {
+                    DestroyImmediate(prefab.GetComponent<Pipe>());
+                }
+            }
         }
 
         private static void AddIronPiece(string assetName, int wood, int nails) {
@@ -130,7 +187,10 @@ namespace ValheimHopper {
                 Category = "Crafting",
             };
 
-            PieceManager.Instance.AddPiece(new CustomPiece(AssetBundle, assetName, true, config));
+
+            CustomPiece customPiece = new CustomPiece(AssetBundle, assetName, true, config);
+            EnsureCorrectComponent(customPiece);
+            PieceManager.Instance.AddPiece(customPiece);
         }
 
         public static void Debug(object data) {

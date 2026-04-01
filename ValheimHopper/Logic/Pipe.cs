@@ -10,11 +10,12 @@ namespace ValheimHopper.Logic {
         public bool IsPickup { get; } = false;
 
         [SerializeField] private Vector3 outPos = new Vector3(0, 0, -1f);
-        [SerializeField] private Vector3 outSize = new Vector3(0.5f, 0.5f, 0.5f);
+        [SerializeField] private Vector3 outSize = new Vector3(0.25f, 0.5f, 0.5f);
 
         private Container container;
         private ContainerTarget containerTarget;
         private List<IPushTarget> pushTo = new List<IPushTarget>();
+        private BoxVisualizer outVisualizer;
         private int lastPullFrame = -1;
 
         private const float ObjectSearchInterval = 3f;
@@ -35,6 +36,9 @@ namespace ValheimHopper.Logic {
             UpdateTransferRate();
             objectSearchFrame = Mathf.RoundToInt((1f / Time.fixedDeltaTime) * ObjectSearchInterval);
             frameOffset = Mathf.Abs(GetInstanceID() % transferFrame);
+
+            outVisualizer = gameObject.AddComponent<BoxVisualizer>();
+            outVisualizer.SetData(outPos, outSize, Color.yellow, Plugin.ShowPipeOutputBox);
         }
 
         private void UpdateTransferRate() {
@@ -107,10 +111,10 @@ namespace ValheimHopper.Logic {
             ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i));
 
             if (item != null) {
-                Plugin.Debug($"[{DbgId}] Pushing '{item.m_shared?.m_name ?? "null"}' -> target [{idx}] (counter={OutputCounter})");
+                Plugin.Debug($"[{DbgId}] Pushing '{item.m_shared?.m_name ?? "null"}' -> target [{idx}] ({to.GetType().Name}) (counter={OutputCounter})");
                 to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
             } else {
-                Plugin.Debug($"[{DbgId}] No pushable item for target [{idx}] (full or filtered)");
+                Plugin.Debug($"[{DbgId}] No pushable item for target [{idx}] ({to.GetType().Name}) (full or filtered)");
             }
         }
 
@@ -128,20 +132,27 @@ namespace ValheimHopper.Logic {
             }
 
             List<IPushTarget> filteredTargets = new List<IPushTarget>();
-            Collider pipeCollider = GetComponentInChildren<Collider>();
+            Collider[] pipeColliders = GetComponentsInChildren<Collider>();
 
             foreach (IPushTarget target in targets) {
                 if (target is Hopper hopper) {
-                    float intersection = HopperHelper.GetIntersectionPercentage(hopper.transform.TransformPoint(hopper.InPos), hopper.InSize, hopper.transform.rotation, pipeCollider);
-                    if (intersection > 0.5f) {
+                    // Check if the hopper's input box overlaps any of the pipe's colliders
+                    bool intersects = HopperHelper.BoxIntersectsColliders(hopper.transform.TransformPoint(hopper.InPos), hopper.InSize, hopper.transform.rotation, pipeColliders);
+                    if (intersects) {
                         filteredTargets.Add(target);
+                        Plugin.Debug($"[{DbgId}] Added Hopper output via body-overlap: {hopper.gameObject.name}");
+                    } else {
+                        Plugin.Debug($"[{DbgId}] Skipped Hopper (no body-overlap): {hopper.gameObject.name}");
                     }
                 } else {
+                    // Not a hopper (e.g. another pipe), just add it
                     filteredTargets.Add(target);
+                    if (target is MonoBehaviour mb) Plugin.Debug($"[{DbgId}] Added standard output target: {mb.gameObject.name}");
                 }
             }
 
             pushTo = filteredTargets;
+            Plugin.Debug($"[{DbgId}] Output list: [{string.Join(", ", pushTo.Select(t => t.GetType().Name))}]");
         }
 
         private void OnDrawGizmos() {

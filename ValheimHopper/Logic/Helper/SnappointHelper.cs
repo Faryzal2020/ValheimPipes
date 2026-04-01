@@ -23,6 +23,17 @@ namespace ValheimHopper.Logic.Helper {
             snappoint.transform.localPosition = pos;
             snappoint.tag = "snappoint";
             snappoint.SetActive(false);
+
+            if (Plugin.ShowSnappointHighlights.Value) {
+                GameObject visual = new GameObject("_snappoint_visual");
+                visual.transform.parent = snappoint.transform;
+                visual.transform.localPosition = Vector3.zero;
+                visual.AddComponent<SnappointVisualizer>();
+                // We keep the main snappoint inactive but its visual child active, 
+                // OR we can make the visual child active while the snappoint stays inactive for snapping.
+                // In Valheim, snapping works on inactive objects with the "snappoint" tag? 
+                // Actually, most snappoints are active gameobjects but with no renderer.
+            }
         }
 
         public static void FixPiece(string name) {

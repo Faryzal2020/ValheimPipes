@@ -22,11 +22,13 @@ namespace ValheimHopper.Logic {
 
         [SerializeField] private Vector3 inPos = new Vector3(0, 0.25f * 1.5f, 0);
         [SerializeField] private Vector3 outPos = new Vector3(0, -0.25f * 1.5f, 0);
-        [SerializeField] private Vector3 inSize = new Vector3(1f, 1f, 1f);
+        [SerializeField] private Vector3 inSize = new Vector3(1f, 0.5f, 1f);
         [SerializeField] private Vector3 outSize = new Vector3(1f, 1f, 1f);
 
         private List<IPushTarget> pushTo = new List<IPushTarget>();
         internal List<IPullTarget> pullFrom = new List<IPullTarget>();
+        private BoxVisualizer inVisualizer;
+        private BoxVisualizer outVisualizer;
         private int lastPullFrame = -1;
 
         private const float ObjectSearchInterval = 3f;
@@ -61,6 +63,12 @@ namespace ValheimHopper.Logic {
             UpdateTransferRate();
             objectSearchFrame = Mathf.RoundToInt((1f / Time.fixedDeltaTime) * ObjectSearchInterval);
             frameOffset = Mathf.Abs(GetInstanceID() % transferFrame);
+
+            inVisualizer = gameObject.AddComponent<BoxVisualizer>();
+            inVisualizer.SetData(inPos, inSize, Color.blue, Plugin.ShowHopperInputBox);
+
+            outVisualizer = gameObject.AddComponent<BoxVisualizer>();
+            outVisualizer.SetData(outPos, outSize, Color.yellow, Plugin.ShowHopperOutputBox);
         }
 
         private void UpdateTransferRate() {
@@ -142,7 +150,7 @@ namespace ValheimHopper.Logic {
                     continue;
                 }
 
-                Plugin.Debug($"[{DbgId}] Pulling '{item.m_shared.m_name}' from source [{idx}] (counter={pullCounter})");
+                Plugin.Debug($"[{DbgId}] Pulling '{item.m_shared.m_name}' <- {from.GetType().Name} ({(from as MonoBehaviour)?.gameObject.name}) (counter={pullCounter})");
                 from.RemoveItem(item, container.GetInventory(), pos, zNetView.m_zdo.m_uid);
                 return;
             }
@@ -168,10 +176,10 @@ namespace ValheimHopper.Logic {
             ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i) && CanPushItem(i));
 
             if (item != null) {
-                Plugin.Debug($"[{DbgId}] Pushing '{item.m_shared.m_name}' -> target [{idx}] (counter={OutputCounter})");
+                Plugin.Debug($"[{DbgId}] Pushing '{item.m_shared.m_name}' -> {to.GetType().Name} ({(to as MonoBehaviour)?.gameObject.name}) (counter={OutputCounter})");
                 to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
             } else {
-                //Plugin.Debug($"[{DbgId}] No pushable item for target [{idx}] (full, filtered, or leave-last)");
+                Plugin.Debug($"[{DbgId}] No pushable item for target [{idx}] ({to.GetType().Name}) (full, filtered, or leave-last)");
             }
         }
 
@@ -259,8 +267,16 @@ namespace ValheimHopper.Logic {
         private void FindIO() {
             Quaternion rotation = transform.rotation;
             pullFrom = HopperHelper.FindTargets<IPullTarget>(transform.TransformPoint(inPos), inSize, rotation, i => i.PullPriority, this);
+            int originalPullCount = pullFrom.Count;
             pullFrom.RemoveAll(i => i is Pipe);
+            if (pullFrom.Count < originalPullCount) {
+                Plugin.Debug($"[{DbgId}] Ignored {originalPullCount - pullFrom.Count} Upstream Pipes (Hoppers cannot pull from Pipes)");
+            }
+            
             pushTo = HopperHelper.FindTargets<IPushTarget>(transform.TransformPoint(outPos), outSize, rotation, i => i.PushPriority, this);
+            
+            Plugin.Debug($"[{DbgId}] Targets: Pull[{pullFrom.Count}] {string.Join(", ", pullFrom.Select(t => (t as MonoBehaviour)?.gameObject.name ?? t.GetType().Name))}");
+            Plugin.Debug($"[{DbgId}] Targets: Push[{pushTo.Count}] {string.Join(", ", pushTo.Select(t => (t as MonoBehaviour)?.gameObject.name ?? t.GetType().Name))}");
             pullFrom.RemoveAll(pull => pushTo.Exists(push => push.NetworkHashCode() == pull.NetworkHashCode()));
         }
 
