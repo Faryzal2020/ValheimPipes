@@ -118,7 +118,6 @@ namespace ValheimHopper {
                     new Vector3(0f, 1.1f, 2f), // Food
                     new Vector3(0f, 0.72f, 0.55f), // Fuel
                 });
-                SnappointHelper.FixPiece("piece_oven");
 
                 SnappointHelper.AddSnappoints("piece_spinningwheel", new[] {
                     new Vector3(0.72f, 1.8f, 0f),

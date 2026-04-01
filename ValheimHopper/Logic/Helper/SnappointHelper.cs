@@ -44,8 +44,16 @@ namespace ValheimHopper.Logic.Helper {
                 return;
             }
 
-            foreach (Collider collider in target.GetComponentsInChildren<Collider>()) {
-                collider.gameObject.layer = LayerMask.NameToLayer("piece");
+            int snapLayer = LayerMask.NameToLayer("piece_nonsolid");
+            if (snapLayer == -1) {
+                Logger.LogError("Layer 'piece_nonsolid' not found!");
+                return;
+            }
+
+            foreach (Transform child in target.GetComponentsInChildren<Transform>()) {
+                if (child.CompareTag("snappoint")) {  // Valheim tags snap points
+                    child.gameObject.layer = snapLayer;
+                }
             }
         }
     }
