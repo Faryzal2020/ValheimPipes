@@ -1,6 +1,6 @@
 # Configuration
-$ModName = "ValheimHopper"
-$ModNameUnity = "UnityValheimHopper"
+$ModName = "ValheimPipes"
+$ModNameUnity = "UnityValheimPipes"
 $Configuration = "Debug"
 $TargetFramework = "net472"
 $OutputDir = "$PSScriptRoot/$ModName/bin/$Configuration/$TargetFramework"

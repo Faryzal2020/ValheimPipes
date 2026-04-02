@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Configuration
-ModName="ValheimHopper"
-ModNameUnity="UnityValheimHopper"
+ModName="ValheimPipes"
+ModNameUnity="UnityValheimPipes"
 Configuration="Debug"
 TargetFramework="net472"
 OutputDir="$ModName/bin/$Configuration/$TargetFramework"

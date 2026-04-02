@@ -1,8 +1,8 @@
 {
 	"name": "ValheimPipes",
 	"description": "Adds hoppers and pipes to transport items (Forked from ItemHopper by MSchmoecker)",
-	"version_number": "1.0.0",
-	"website_url": "https://github.com/Faryzal2020/ValheimHopper",
+	"version_number": "1.0.1",
+	"website_url": "https://github.com/Faryzal2020/ValheimPipes",
 	"dependencies": [
 		"denikson-BepInExPack_Valheim-5.4.2202",
 		"ValheimModding-Jotunn-2.21.3",

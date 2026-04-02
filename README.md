@@ -1,9 +1,10 @@
-# Item Hopper
+# Valheim Pipes
 ## About
-Adds hoppers and pipes to transport items.
-Forked from [ItemHopper by MSchmoecker](https://valheim.thunderstore.io/package/MSchmoecker/ItemHopper/) with his permission.
+Adds hoppers and pipes to transport items. 
+This is a fork of MSchmoecker's [ItemHopper](https://valheim.thunderstore.io/package/MSchmoecker/ItemHopper/) with several improvements and features.
 
-This fork added some features and improvements to how the pipes would distribute the items.
+The main difference is the improved item distribution algorithm. Where the original mod could be a bit unpredictable with throughput splitting, this fork uses monitored output neighbors scanning from the pipe to handle the push instead of asynchronous transfers between all the push/pulls from each hopper and pipes to make it more consistent and reliable.
+
 
 ## Features
 ### Tiered Hoppers and Pipes
@@ -26,8 +27,10 @@ Different hopper types are available, all can be found in the hammer crafting ta
 | <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Iron_V.png" />                         | Iron hopper          | 6 wood, 2 iron nails   |
 | <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Iron_H.png" />                         | Iron side hopper     | 6 wood, 2 iron nails   |
 
-Bronze hoppers and pipes have a transfer speed of 1 item per second.
-Iron hoppers and pipes have a transfer speed of 2 items per second.
+Bronze hoppers and pipes have a transfer speed of 60 items per minute (1/sec).
+Iron hoppers and pipes have a transfer speed of 120 items per minute (2/sec).
+Both speeds are fully configurable in the config.
+
 
 The bronze hopper has one slot while the iron hopper has three.
 Hoppers can pickup and move items, while pipes can only move items.
@@ -39,6 +42,14 @@ Every hopper can have it's own setting. They appear in a custom UI when the hopp
   The last item will be remembered with a "ghost" item and only this item type will be moved to the hopper.
 - Enable Item Dropping: if enabled and the hopper has no target inventory they will dropped like the smelter does for example.
 - Enable Item Pickup: if disabled the hopper will not pickup items from the ground.
+
+
+### Supported Machines and Prefabs
+The hoppers and pipes can interact with most vanilla containers, but we've also added specific support for:
+- **Vanilla Oven** (`piece_oven`): Push and Pull support.
+- **Vanilla Windmill** (`windmill`): Pull support.
+- **Clay Collector** (`BCP_ClayCollector` from FineWoodPieces): Pull support.
+- **Beehive** (`RDP_beehive` from Producers): Push and Pull support.
 
 
 ### Seamless multiplayer
