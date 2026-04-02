@@ -17,6 +17,7 @@ namespace ValheimHopper {
     [BepInDependency(Jotunn.Main.ModGuid)]
     [BepInDependency("com.maxsch.valheim.MultiUserChest")]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
+    [SynchronizationMode(AdminOnlyStrictness.IfOnServer)]
     public class Plugin : BaseUnityPlugin {
         [PublicAPI] public const string ModName = "ValheimPipes";
         [PublicAPI] public const string ModGuid = "com.faryzal2020.valheim.ValheimPipes";
@@ -46,6 +47,17 @@ namespace ValheimHopper {
             harmony = new Harmony(ModGuid);
             harmony.PatchAll();
 
+            ConfigurationManagerAttributes syncedAttr = new ConfigurationManagerAttributes { IsAdminOnly = true };
+
+            BronzeTransferRate = Config.Bind("General", "Bronze Transfer Rate", 60f,
+                new ConfigDescription("Items per minute for bronze hoppers and pipes.", null, syncedAttr));
+
+            IronTransferRate = Config.Bind("General", "Iron Transfer Rate", 120f,
+                new ConfigDescription("Items per minute for iron hoppers.", null, syncedAttr));
+
+            ExtraCompatiblePrefabs = Config.Bind("Compatibility", "Extra Compatible Prefabs", "BCP_ClayCollector,RDP_beehive",
+                new ConfigDescription("A comma-separated list of prefab names to treat as compatible (containers, beehives, smelters, etc.).", null, syncedAttr));
+
             addSmelterSnappoints = Config.Bind("General", "Add Smelter Snappoints", true, "Adds snappoints to inputs/outputs of the smelter, charcoal kiln, blastfurnace, windmill and spinning wheel. Requires a restart to take effect.");
             debugLogs = Config.Bind("General", "Debug Logs", false, "Enable debug logging.");
 
@@ -57,11 +69,12 @@ namespace ValheimHopper {
             ShowPipeOutputBox = Config.Bind("Debug", "Show Pipe Output Box", false, "Show the pipe output bounding box in-game.");
             ShowSnappointHighlights = Config.Bind("Debug", "Show Snappoint Highlights", false, "Show a visual marker for custom snappoints added by the mod. Requires local restart of the area (teleport or logout) to take effect.");
 
-            ExtraCompatiblePrefabs = Config.Bind("Compatibility", "Extra Compatible Prefabs", "", "A comma-separated list of prefab names to treat as compatible (containers, beehives, smelters, etc.).");
-
-
-
-
+            SynchronizationManager.OnConfigurationSynchronized += (obj, attr) => {
+                if (!attr.InitialSynchronization) {
+                    Jotunn.Logger.LogMessage("Server synced new config values.");
+                    // Re-apply transfer rates if needed
+                }
+            };
 
             CustomLocalization localization = LocalizationManager.Instance.GetLocalization();
             localization.AddJsonFile("English", AssetUtils.LoadTextFromResources("Localization.English.json"));

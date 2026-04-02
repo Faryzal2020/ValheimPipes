@@ -29,6 +29,10 @@ namespace ValheimHopper.Patches {
             if (__instance.m_addOreSwitch && !__instance.GetComponent<SmelterOreTarget>()) {
                 __instance.gameObject.AddComponent<SmelterOreTarget>();
             }
+
+            if (__instance.name.StartsWith("windmill") && !__instance.GetComponent<WindmillTarget>()) {
+                __instance.gameObject.AddComponent<WindmillTarget>();
+            }
         }
 
         [HarmonyPatch(typeof(Beehive), nameof(Beehive.Awake)), HarmonyPostfix]
