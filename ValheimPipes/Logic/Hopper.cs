@@ -42,6 +42,8 @@ namespace ValheimPipes.Logic {
         public ItemFilter filter;
 
         public ZBool FilterItemsOption { get; private set; }
+        public ZBool BlacklistModeOption { get; private set; }
+        public ZBool StackModeOption { get; private set; }
         public ZBool DropItemsOption { get; private set; }
         public ZBool PickupItemsOption { get; private set; }
         public ZBool LeaveLastItemOption { get; private set; }
@@ -56,6 +58,8 @@ namespace ValheimPipes.Logic {
             containerTarget = GetComponent<ContainerTarget>();
 
             FilterItemsOption = new ZBool("hopper_filter_items", false, zNetView);
+            BlacklistModeOption = new ZBool("hopper_blacklist_mode", false, zNetView);
+            StackModeOption = new ZBool("hopper_stack_mode", false, zNetView);
             DropItemsOption = new ZBool("hopper_drop_items", false, zNetView);
             PickupItemsOption = new ZBool("hopper_pickup_items", true, zNetView);
             LeaveLastItemOption = new ZBool("hopper_leave_last_item", false, zNetView);
@@ -107,6 +111,8 @@ namespace ValheimPipes.Logic {
 
         public void PasteData(Hopper copy) {
             FilterItemsOption.Set(copy.FilterItemsOption.Get());
+            BlacklistModeOption.Set(copy.BlacklistModeOption.Get());
+            StackModeOption.Set(copy.StackModeOption.Get());
             DropItemsOption.Set(copy.DropItemsOption.Get());
             PickupItemsOption.Set(copy.PickupItemsOption.Get());
             LeaveLastItemOption.Set(copy.LeaveLastItemOption.Get());
@@ -115,6 +121,8 @@ namespace ValheimPipes.Logic {
 
         public void ResetValues() {
             FilterItemsOption.Reset();
+            BlacklistModeOption.Reset();
+            StackModeOption.Reset();
             DropItemsOption.Reset();
             PickupItemsOption.Reset();
             LeaveLastItemOption.Reset();
@@ -122,7 +130,7 @@ namespace ValheimPipes.Logic {
         }
 
         private void FixedUpdate() {
-            if (!IsValid() || !zNetView.IsOwner()) {
+            if (!IsValid() || !zNetView.IsOwner() || Plugin.DisableAllSystems.Value) {
                 return;
             }
 
@@ -170,8 +178,16 @@ namespace ValheimPipes.Logic {
                     continue;
                 }
 
-                Plugin.Debug($"[{DbgId}] Pulling '{item.m_shared.m_name}' <- {from.GetType().Name} ({(from as MonoBehaviour)?.gameObject.name}) (counter={pullCounter})");
-                from.RemoveItem(item, container.GetInventory(), pos, zNetView.m_zdo.m_uid);
+                int amount = 1;
+                if (StackModeOption.Get() && name.Contains("Iron")) {
+                    int stackSize = item.m_shared.m_maxStackSize;
+                    int currentInSource = item.m_stack;
+                    int roomInHopper = container.GetInventory().GetRoomForItem(item);
+                    amount = Mathf.Min(stackSize, currentInSource, roomInHopper);
+                }
+
+                Plugin.Debug($"[{DbgId}] Pulling {amount}x '{item.m_shared.m_name}' <- {from.GetType().Name} ({(from as MonoBehaviour)?.gameObject.name}) (counter={pullCounter})");
+                from.RemoveItem(item, container.GetInventory(), pos, zNetView.m_zdo.m_uid, amount);
                 HopperHelper.NotifyChange(this);
                 HopperHelper.NotifyChange(from);
                 return;
@@ -202,8 +218,20 @@ namespace ValheimPipes.Logic {
             ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i) && CanPushItem(i));
 
             if (item != null) {
-                Plugin.Debug($"[{DbgId}] Pushing '{item.m_shared.m_name}' -> {to.GetType().Name} ({(to as MonoBehaviour)?.gameObject.name}) (counter={OutputCounter})");
-                to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
+                int amount = 1;
+                if (StackModeOption.Get() && name.Contains("Iron")) {
+                    // Calculate how many of this item type can be pushed
+                    int stackSize = item.m_shared.m_maxStackSize;
+                    int countInHopper = container.GetInventory().CountItems(item.m_shared.m_name);
+                    
+                    // If LeaveLastItem is on, reserve 1
+                    if (LeaveLastItemOption.Get()) countInHopper--;
+                    
+                    amount = Mathf.Min(stackSize, countInHopper);
+                }
+
+                Plugin.Debug($"[{DbgId}] Pushing {amount}x '{item.m_shared.m_name}' -> {to.GetType().Name} ({(to as MonoBehaviour)?.gameObject.name}) (counter={OutputCounter})");
+                to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid, amount);
                 HopperHelper.NotifyChange(this);
                 HopperHelper.NotifyChange(to);
             } else {
@@ -229,9 +257,9 @@ namespace ValheimPipes.Logic {
             return FindFreeSlot(item, out _);
         }
 
-        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender) {
+        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender, int amount = 1) {
             FindFreeSlot(item, out Vector2i pos);
-            container.AddItemToChest(item, source, pos, sender, 1);
+            container.AddItemToChest(item, source, pos, sender, amount);
         }
 
         public IEnumerable<ItemDrop.ItemData> GetItems() {
@@ -242,10 +270,10 @@ namespace ValheimPipes.Logic {
             return containerTarget.GetItems();
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender) {
+        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             Plugin.Debug($"[{DbgId}] RemoveItem '{item.m_shared.m_name}' pulled by upstream");
             lastPullFrame = HopperHelper.GetFixedFrameCount();
-            containerTarget.RemoveItem(item, destination, destinationPos, sender);
+            containerTarget.RemoveItem(item, destination, destinationPos, sender, amount);
         }
 
         private bool FindFreeSlot(ItemDrop.ItemData itemToAdd, out Vector2i pos) {
@@ -268,12 +296,23 @@ namespace ValheimPipes.Logic {
                     }
 
                     if (FilterItemsOption.Get()) {
-                        int filterHash = filter.GetItemHash(x, y);
-                        bool isFiltered = filterHash == 0 || filterHash == itemHash;
-
-                        if (isFiltered) {
+                        if (BlacklistModeOption.Get()) {
+                            // In Blacklist mode, if the item is in ANY filter slot, it's rejected
+                            if (filter.Contains(itemHash)) {
+                                return false;
+                            }
+                            // Otherwise, it can go anywhere with room
                             pos = new Vector2i(x, y);
                             return true;
+                        } else {
+                            // Whitelist mode: per-slot filter
+                            int filterHash = filter.GetItemHash(x, y);
+                            bool isFiltered = filterHash == 0 || filterHash == itemHash;
+
+                            if (isFiltered) {
+                                pos = new Vector2i(x, y);
+                                return true;
+                            }
                         }
                     } else {
                         pos = new Vector2i(x, y);

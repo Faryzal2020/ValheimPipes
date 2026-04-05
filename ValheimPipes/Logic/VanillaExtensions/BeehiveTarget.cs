@@ -28,19 +28,20 @@ namespace ValheimPipes.Logic {
             }
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender) {
+        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             if (!beehive.m_nview.IsOwner()) {
                 beehive.m_nview.InvokeRPC(RequestOwnershipRPC);
                 return;
             }
-
+ 
             int honeyLevel = beehive.GetHoneyLevel();
-            if (honeyLevel <= 0) {
+            int toRemove = Mathf.Min(honeyLevel, amount);
+            if (toRemove <= 0) {
                 return;
             }
-
-            beehive.m_nview.GetZDO().Set(ZDOVars.s_level, honeyLevel - 1);
-            destination.AddItem(item.Clone(), 1, destinationPos.x, destinationPos.y);
+ 
+            beehive.m_nview.GetZDO().Set(ZDOVars.s_level, honeyLevel - toRemove);
+            destination.AddItem(item.Clone(), toRemove, destinationPos.x, destinationPos.y);
         }
 
         private void RPC_RequestOwnership(long sender) {

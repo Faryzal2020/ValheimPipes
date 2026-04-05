@@ -142,8 +142,8 @@ namespace ValheimPipes.Logic {
             return cookingStation.GetFreeSlot() != -1;
         }
 
-        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender) {
-            bool removed = source.RemoveItem(item, 1);
+        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender, int amount = 1) {
+            bool removed = source.RemoveItem(item, amount);
             if (!removed) return;
 
             if (IsFuelItem(item)) {
@@ -191,7 +191,7 @@ namespace ValheimPipes.Logic {
             return result;
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender) {
+        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             int slotCount = cookingStation.m_slots.Length;
             ZDO zdo = cookingStation.m_nview.GetZDO();
 

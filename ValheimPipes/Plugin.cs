@@ -9,7 +9,7 @@ using Jotunn.Entities;
 using Jotunn.Utils;
 using Jotunn.Managers;
 using ValheimPipes.Logic.Helper;
-using ValheimPipes.UI;
+using ValheimHopper.UI;
 using ValheimPipes.Logic;
 
 namespace ValheimPipes {
@@ -32,6 +32,8 @@ namespace ValheimPipes {
         public static ConfigEntry<bool> ShowPipeOutputBox;
         public static ConfigEntry<bool> ShowSnappointHighlights;
         public static ConfigEntry<string> ExtraCompatiblePrefabs;
+        public static ConfigEntry<bool> DisableAllSystems;
+
 
 
 
@@ -68,6 +70,7 @@ namespace ValheimPipes {
             ShowHopperOutputBox = Config.Bind("Debug", "Show Hopper Output Box", false, "Show the hopper output bounding box in-game.");
             ShowPipeOutputBox = Config.Bind("Debug", "Show Pipe Output Box", false, "Show the pipe output bounding box in-game.");
             ShowSnappointHighlights = Config.Bind("Debug", "Show Snappoint Highlights", false, "Show a visual marker for custom snappoints added by the mod. Requires local restart of the area (teleport or logout) to take effect.");
+            DisableAllSystems = Config.Bind("Debug", "Disable All Systems", false, "Globally disable all push/pull mechanisms for debugging purposes.");
 
             SynchronizationManager.OnConfigurationSynchronized += (obj, attr) => {
                 if (!attr.InitialSynchronization) {

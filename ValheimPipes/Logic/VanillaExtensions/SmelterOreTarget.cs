@@ -16,9 +16,18 @@ namespace ValheimPipes.Logic {
             return smelter.IsItemAllowed(item) && smelter.GetQueueSize() < smelter.m_maxOre;
         }
 
-        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender) {
-            source.RemoveItem(item, 1);
-            smelter.m_nview.InvokeRPC("RPC_AddOre", item.m_dropPrefab.name);
+        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender, int amount = 1) {
+            int queueSize = smelter.GetQueueSize();
+            int canAddCount = smelter.m_maxOre - queueSize;
+            int toAdd = Mathf.Min(amount, canAddCount);
+
+            if (toAdd <= 0) return;
+
+            source.RemoveItem(item, toAdd);
+
+            for (int i = 0; i < toAdd; i++) {
+                smelter.m_nview.InvokeRPC("RPC_AddOre", item.m_dropPrefab.name);
+            }
         }
 
         public bool InRange(Vector3 position) {

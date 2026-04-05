@@ -22,5 +22,7 @@
   "hopper_options_leave_last_item": "Leave last item",
   "hopper_copy": "Copy",
   "hopper_paste": "Paste",
-  "hopper_reset": "Reset"
+  "hopper_reset": "Reset",
+  "hopper_options_blacklist": "Blacklist mode",
+  "hopper_options_stack": "Stack mode"
 }

@@ -17,7 +17,9 @@ namespace ValheimPipes.Logic {
         }
 
         private void Start() {
-            container.GetInventory().m_onChanged += OnInventoryChanged;
+            if (container != null && container.GetInventory() != null) {
+                container.GetInventory().m_onChanged += OnInventoryChanged;
+            }
         }
 
         private void OnInventoryChanged() {
@@ -28,12 +30,12 @@ namespace ValheimPipes.Logic {
             return container.GetInventory().GetItemInReverseOrder();
         }
 
-        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender) {
-            container.AddItemToChest(item, source, new Vector2i(-1, -1), sender, 1);
+        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender, int amount = 1) {
+            container.AddItemToChest(item, source, new Vector2i(-1, -1), sender, amount);
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender) {
-            container.RemoveItemFromChest(item, destination, destinationPos, sender, 1);
+        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
+            container.RemoveItemFromChest(item, destination, destinationPos, sender, amount);
         }
 
         public bool CanAddItem(ItemDrop.ItemData item) {

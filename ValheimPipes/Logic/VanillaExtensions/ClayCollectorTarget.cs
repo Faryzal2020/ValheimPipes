@@ -55,7 +55,7 @@ namespace ValheimPipes.Logic {
             }
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender) {
+        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             if (zNetView == null || !zNetView.IsValid() || collectorComponent == null) return;
 
             if (!zNetView.IsOwner()) {

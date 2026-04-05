@@ -41,11 +41,17 @@ namespace ValheimPipes.Logic {
         }
 
         public override bool Get() {
-            return NetView.GetZDO().GetBool(KeyHash, DefaultValue);
+            if (NetView == null || !NetView.IsValid()) return DefaultValue;
+            ZDO zdo = NetView.GetZDO();
+            if (zdo == null) return DefaultValue;
+            return zdo.GetBool(KeyHash, DefaultValue);
         }
 
         protected override void SetValue(bool value) {
-            NetView.GetZDO().Set(KeyHash, value);
+            if (NetView == null || !NetView.IsValid()) return;
+            ZDO zdo = NetView.GetZDO();
+            if (zdo == null) return;
+            zdo.Set(KeyHash, value);
         }
     }
 
@@ -54,11 +60,17 @@ namespace ValheimPipes.Logic {
         }
 
         public override int Get() {
-            return NetView.GetZDO().GetInt(KeyHash, DefaultValue);
+            if (NetView == null || !NetView.IsValid()) return DefaultValue;
+            ZDO zdo = NetView.GetZDO();
+            if (zdo == null) return DefaultValue;
+            return zdo.GetInt(KeyHash, DefaultValue);
         }
 
         protected override void SetValue(int value) {
-            NetView.GetZDO().Set(KeyHash, value);
+            if (NetView == null || !NetView.IsValid()) return;
+            ZDO zdo = NetView.GetZDO();
+            if (zdo == null) return;
+            zdo.Set(KeyHash, value);
         }
     }
 }

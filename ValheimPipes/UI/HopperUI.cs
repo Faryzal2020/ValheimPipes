@@ -3,9 +3,12 @@ using Jotunn.GUI;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
+using ValheimPipes;
 using ValheimPipes.Logic;
 
-namespace ValheimPipes.UI {
+// NOTE: Namespace is ValheimHopper.UI for compatibility with the AssetBundle,
+// which expects this specific namespace for script references on UI prefabs.
+namespace ValheimHopper.UI {
     public class HopperUI : MonoBehaviour {
         public static HopperUI Instance { get; private set; }
         public static bool IsOpen { get; private set; }
@@ -18,6 +21,8 @@ namespace ValheimPipes.UI {
         [SerializeField] private Toggle dropItems;
         [SerializeField] private Toggle pickupItems;
         [SerializeField] private Toggle leaveLastItem;
+        private Toggle blacklistMode;
+        private Toggle stackMode;
 
         [SerializeField] private Button copyButton;
         [SerializeField] private Button pasteButton;
@@ -31,11 +36,12 @@ namespace ValheimPipes.UI {
         private void Awake() {
             Instance = this;
 
-            dropItems.onValueChanged.AddListener(i => target.DropItemsOption.Set(i));
-            pickupItems.onValueChanged.AddListener(i => target.PickupItemsOption.Set(i));
-            leaveLastItem.onValueChanged.AddListener(i => target.LeaveLastItemOption.Set(i));
+            dropItems.onValueChanged.AddListener(i => { if (target != null) target.DropItemsOption.Set(i); });
+            pickupItems.onValueChanged.AddListener(i => { if (target != null) target.PickupItemsOption.Set(i); });
+            leaveLastItem.onValueChanged.AddListener(i => { if (target != null) target.LeaveLastItemOption.Set(i); });
 
             filterHopper.onValueChanged.AddListener(active => {
+                if (target == null) return;
                 target.FilterItemsOption.Set(active);
 
                 if (active) {
@@ -45,19 +51,40 @@ namespace ValheimPipes.UI {
                 }
             });
 
-            copyButton.onClick.AddListener(() => { copy = target; });
-            pasteButton.onClick.AddListener(() => { target.PasteData(copy); });
-            resetButton.onClick.AddListener(() => { target.ResetValues(); });
+            copyButton.onClick.AddListener(() => { if (target != null) copy = target; });
+            pasteButton.onClick.AddListener(() => {
+                if (target != null && copy != null && copy.IsValid()) {
+                    target.PasteData(copy);
+                }
+            });
+            resetButton.onClick.AddListener(() => { if (target != null) target.ResetValues(); });
+        }
+
+        private void SetupNewToggles() {
+            blacklistMode.onValueChanged.AddListener(i => { if (target != null) target.BlacklistModeOption.Set(i); });
+            stackMode.onValueChanged.AddListener(i => { if (target != null) target.StackModeOption.Set(i); });
         }
 
         public static void Init() {
             GameObject prefab = Plugin.AssetBundle.LoadAsset<GameObject>("HopperUI");
-            HopperUI ui = Instantiate(prefab, GUIManager.CustomGUIFront.transform, false).GetComponent<HopperUI>();
-            uiRoot = ui.transform.GetChild(0).gameObject;
+            GameObject obj = Instantiate(prefab, GUIManager.CustomGUIFront.transform, false);
+            uiRoot = obj.transform.GetChild(0).gameObject;
+            HopperUI ui = obj.GetComponent<HopperUI>();
+
+            if (ui == null) {
+                Jotunn.Logger.LogWarning("HopperUI component missing on prefab! If you renamed the namespace, you must restore it to ValheimHopper.UI for AssetBundle compatibility.");
+                uiRoot.SetActive(false);
+                return;
+            }
 
             ApplyAllComponents(uiRoot);
             GUIManager.Instance.ApplyTextStyle(ui.title, GUIManager.Instance.AveriaSerifBold, GUIManager.Instance.ValheimOrange, 20);
             ApplyLocalization();
+
+            // Create new toggles
+            ui.blacklistMode = CreateToggle(ui.filterHopper, "BlacklistMode", "$hopper_options_blacklist", new Vector2(0, -110));
+            ui.stackMode = CreateToggle(ui.filterHopper, "StackMode", "$hopper_options_stack", new Vector2(0, -140));
+            ui.SetupNewToggles();
 
             uiRoot.AddComponent<DragWindowCntrl>();
             uiRoot.SetActive(false);
@@ -104,6 +131,11 @@ namespace ValheimPipes.UI {
             dropItems.SetIsOnWithoutNotify(target.DropItemsOption.Get());
             pickupItems.SetIsOnWithoutNotify(target.PickupItemsOption.Get());
             leaveLastItem.SetIsOnWithoutNotify(target.LeaveLastItemOption.Get());
+            blacklistMode.SetIsOnWithoutNotify(target.BlacklistModeOption.Get());
+            stackMode.SetIsOnWithoutNotify(target.StackModeOption.Get());
+
+            bool isIron = target.name.Contains("Iron");
+            stackMode.gameObject.SetActive(isIron);
         }
 
         private static void ApplyAllComponents(GameObject root) {
@@ -128,6 +160,15 @@ namespace ValheimPipes.UI {
             foreach (Text text in uiRoot.GetComponentsInChildren<Text>()) {
                 text.text = Localization.instance.Localize(text.text);
             }
+        }
+
+        private static Toggle CreateToggle(Toggle source, string name, string label, Vector2 offset) {
+            Toggle toggle = Instantiate(source, source.transform.parent);
+            toggle.name = name;
+            toggle.transform.localPosition += (Vector3)offset;
+            toggle.GetComponentInChildren<Text>().text = Localization.instance.Localize(label);
+            GUIManager.Instance.ApplyToogleStyle(toggle);
+            return toggle;
         }
     }
 }

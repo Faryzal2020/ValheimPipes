@@ -21,20 +21,27 @@ namespace ValheimPipes.Logic {
             }
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender) {
+        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             if (!itemDrop.m_nview.IsOwner()) {
                 itemDrop.RequestOwn();
                 return;
             }
 
-            bool wasRemoved = itemDrop.RemoveOne();
+            int currentStack = itemDrop.m_itemData.m_stack;
+            int toRemove = Mathf.Min(currentStack, amount);
 
-            if (!wasRemoved) {
-                return;
+            if (toRemove <= 0) return;
+
+            if (toRemove >= currentStack) {
+                // Remove all
+                itemDrop.m_nview.Destroy();
+            } else {
+                // Reduce stack
+                itemDrop.m_itemData.m_stack -= toRemove;
+                itemDrop.m_nview.GetZDO().Set(ZDOVars.s_stack, itemDrop.m_itemData.m_stack);
             }
 
-            ItemDrop.ItemData itemData = itemDrop.m_itemData.Clone();
-            destination.AddItem(itemData, 1, destinationPos.x, destinationPos.y);
+            destination.AddItem(item.Clone(), toRemove, destinationPos.x, destinationPos.y);
         }
 
         public bool InRange(Vector3 position) {

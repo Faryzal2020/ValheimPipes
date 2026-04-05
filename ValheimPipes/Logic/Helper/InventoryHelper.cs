@@ -36,5 +36,16 @@ namespace ValheimPipes.Logic.Helper {
                 }
             }
         }
+
+        public static int GetRoomForItem(this Inventory target, ItemDrop.ItemData itemData) {
+            int room = 0;
+            foreach (var item in target.m_inventory) {
+                if (item.m_shared.m_name == itemData.m_shared.m_name) {
+                    room += Math.Max(0, item.m_shared.m_maxStackSize - item.m_stack);
+                }
+            }
+            room += target.GetEmptySlots() * itemData.m_shared.m_maxStackSize;
+            return room;
+        }
     }
 }

@@ -13,14 +13,22 @@ namespace ValheimPipes.Logic {
             turret = GetComponent<Turret>();
         }
 
-        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender) {
-            bool removed = source.RemoveItem(item, 1);
+        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender, int amount = 1) {
+            int ammo = turret.GetAmmo();
+            int canAddCount = turret.m_maxAmmo - ammo;
+            int toAdd = Mathf.Min(amount, canAddCount);
+
+            if (toAdd <= 0) return;
+
+            bool removed = source.RemoveItem(item, toAdd);
 
             if (!removed) {
                 return;
             }
 
-            turret.m_nview.InvokeRPC("RPC_AddAmmo", item.m_dropPrefab.name);
+            for (int i = 0; i < toAdd; i++) {
+                turret.m_nview.InvokeRPC("RPC_AddAmmo", item.m_dropPrefab.name);
+            }
         }
 
         public bool CanAddItem(ItemDrop.ItemData item) {

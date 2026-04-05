@@ -3,6 +3,6 @@ namespace ValheimPipes.Logic {
         HopperPriority PushPriority { get; }
 
         bool CanAddItem(ItemDrop.ItemData item);
-        void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender);
+        void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender, int amount = 1);
     }
 }

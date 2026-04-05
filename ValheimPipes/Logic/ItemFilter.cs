@@ -63,5 +63,16 @@ namespace ValheimPipes.Logic {
             slots[key] = slot;
             return slot;
         }
+
+        public bool Contains(int itemHash) {
+            for (int x = 0; x < inventory.m_width; x++) {
+                for (int y = 0; y < inventory.m_height; y++) {
+                    if (GetItemHash(x, y) == itemHash) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

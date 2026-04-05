@@ -55,17 +55,18 @@ namespace ValheimPipes.Logic {
             return items;
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender) {
+        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             ZDO zdo = smelter.m_nview.GetZDO();
             int count = zdo.GetInt("SpawnAmount", 0);
 
-            if (count <= 0) return;
+            int toRemove = Mathf.Min(count, amount);
+            if (toRemove <= 0) return;
 
             smelter.m_nview.ClaimOwnership();
-            zdo.Set("SpawnAmount", count - 1);
-            destination.AddItem(item.Clone(), 1, destinationPos.x, destinationPos.y);
+            zdo.Set("SpawnAmount", count - toRemove);
+            destination.AddItem(item.Clone(), toRemove, destinationPos.x, destinationPos.y);
             
-            Plugin.Debug($"RemoveItem: removed 1 {item.m_shared.m_name} from Windmill via ZDO write");
+            Plugin.Debug($"RemoveItem: removed {toRemove} {item.m_shared.m_name} from Windmill via ZDO write");
         }
     }
 }
