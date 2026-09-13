@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -8,10 +8,10 @@ public class BuildAssetBundle : MonoBehaviour {
     [MenuItem("Assets/Build AssetBundles")]
     private static void BuildAllAssetBundles() {
         const string assetBundleOutputPath = "AssetBundles/StandaloneWindows";
-        string hopperAssetBundlePath = Path.Combine(assetBundleOutputPath, "ValheimHopper_AssetBundle");
+        string hopperAssetBundlePath = Path.Combine(assetBundleOutputPath, "valheimpipes_assetbundle");
 
         BuildPipeline.BuildAssetBundles(assetBundleOutputPath, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
-        FileUtil.ReplaceFile(hopperAssetBundlePath, "../ValheimHopper/ValheimHopper_AssetBundle");
+        FileUtil.ReplaceFile(hopperAssetBundlePath, "../ValheimPipes/valheimpipes_assetbundle");
     }
 
     [MenuItem("Assets/Create Procedural Mesh")]

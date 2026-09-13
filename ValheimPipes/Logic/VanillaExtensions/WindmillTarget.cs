@@ -1,3 +1,4 @@
+using MultiUserChest;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -55,7 +56,7 @@ namespace ValheimPipes.Logic {
             return items;
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
+        public void RemoveItem(ItemDrop.ItemData item, Container destinationContainer, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             ZDO zdo = smelter.m_nview.GetZDO();
             int count = zdo.GetInt("SpawnAmount", 0);
 
@@ -64,7 +65,7 @@ namespace ValheimPipes.Logic {
 
             smelter.m_nview.ClaimOwnership();
             zdo.Set("SpawnAmount", count - toRemove);
-            destination.AddItem(item.Clone(), toRemove, destinationPos.x, destinationPos.y);
+            destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, toRemove);
             
             Plugin.Debug($"RemoveItem: removed {toRemove} {item.m_shared.m_name} from Windmill via ZDO write");
         }

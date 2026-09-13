@@ -9,8 +9,9 @@ using Jotunn.Entities;
 using Jotunn.Utils;
 using Jotunn.Managers;
 using ValheimPipes.Logic.Helper;
-using ValheimHopper.UI;
+using ValheimPipes.UI;
 using ValheimPipes.Logic;
+using UnityEngine.SceneManagement;
 
 namespace ValheimPipes {
     [BepInPlugin(ModGuid, ModName, ModVersion)]
@@ -21,7 +22,7 @@ namespace ValheimPipes {
     public class Plugin : BaseUnityPlugin {
         [PublicAPI] public const string ModName = "ValheimPipes";
         [PublicAPI] public const string ModGuid = "com.faryzal2020.valheim.ValheimPipes";
-        [PublicAPI] public const string ModVersion = "1.0.1";
+        [PublicAPI] public const string ModVersion = "1.1.0";
 
         private static ConfigEntry<bool> addSmelterSnappoints;
         private static ConfigEntry<bool> debugLogs;
@@ -85,7 +86,7 @@ namespace ValheimPipes {
             localization.AddJsonFile("Russian", AssetUtils.LoadTextFromResources("Localization.Russian.json"));
             localization.AddJsonFile("Portuguese_Brazilian", AssetUtils.LoadTextFromResources("Localization.Portuguese_Brazilian.json"));
 
-            AssetBundle = AssetUtils.LoadAssetBundleFromResources("ValheimHopper_AssetBundle");
+            AssetBundle = AssetUtils.LoadAssetBundleFromResources("valheimpipes_assetbundle");
 
             AddBronzePiece("HopperBronzeDown", 6, 4);
             AddBronzePiece("HopperBronzeSide", 6, 4);
@@ -103,7 +104,10 @@ namespace ValheimPipes {
             AddIronPiece("HopperIronSide", 6, 2);
 
             PrefabManager.OnVanillaPrefabsAvailable += AddSnappoints;
-            GUIManager.OnCustomGUIAvailable += HopperUI.Init;
+        }
+ 
+        private void Update() {
+            HopperUI.UpdateStatic();
         }
 
         private static void AddSnappoints() {

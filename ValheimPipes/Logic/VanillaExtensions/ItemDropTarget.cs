@@ -1,3 +1,4 @@
+using MultiUserChest;
 using System.Collections.Generic;
 using UnityEngine;
 using ValheimPipes.Logic.Helper;
@@ -21,7 +22,7 @@ namespace ValheimPipes.Logic {
             }
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
+        public void RemoveItem(ItemDrop.ItemData item, Container destinationContainer, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             if (!itemDrop.m_nview.IsOwner()) {
                 itemDrop.RequestOwn();
                 return;
@@ -41,7 +42,7 @@ namespace ValheimPipes.Logic {
                 itemDrop.m_nview.GetZDO().Set(ZDOVars.s_stack, itemDrop.m_itemData.m_stack);
             }
 
-            destination.AddItem(item.Clone(), toRemove, destinationPos.x, destinationPos.y);
+            destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, toRemove);
         }
 
         public bool InRange(Vector3 position) {

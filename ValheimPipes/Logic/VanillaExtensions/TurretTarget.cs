@@ -1,3 +1,4 @@
+using MultiUserChest;
 using System;
 using UnityEngine;
 using ValheimPipes.Logic.Helper;
@@ -13,18 +14,14 @@ namespace ValheimPipes.Logic {
             turret = GetComponent<Turret>();
         }
 
-        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender, int amount = 1) {
+        public void AddItem(ItemDrop.ItemData item, Container sourceContainer, ZDOID sender, int amount = 1) {
             int ammo = turret.GetAmmo();
             int canAddCount = turret.m_maxAmmo - ammo;
             int toAdd = Mathf.Min(amount, canAddCount);
 
             if (toAdd <= 0) return;
 
-            bool removed = source.RemoveItem(item, toAdd);
-
-            if (!removed) {
-                return;
-            }
+            sourceContainer.RemoveItemFromChest(item, null, new Vector2i(-1, -1), sender, toAdd);
 
             for (int i = 0; i < toAdd; i++) {
                 turret.m_nview.InvokeRPC("RPC_AddAmmo", item.m_dropPrefab.name);

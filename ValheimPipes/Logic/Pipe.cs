@@ -90,9 +90,9 @@ namespace ValheimPipes.Logic {
             return containerTarget.CanAddItem(item);
         }
 
-        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender, int amount = 1) {
+        public void AddItem(ItemDrop.ItemData item, Container sourceContainer, ZDOID sender, int amount = 1) {
             Plugin.Debug($"[{DbgId}] AddItem '{item?.m_shared?.m_name ?? "null"}' pushed by upstream");
-            containerTarget.AddItem(item, source, sender, amount);
+            containerTarget.AddItem(item, sourceContainer, sender, amount);
         }
 
         public IEnumerable<ItemDrop.ItemData> GetItems() {
@@ -103,10 +103,10 @@ namespace ValheimPipes.Logic {
             return containerTarget.GetItems();
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
+        public void RemoveItem(ItemDrop.ItemData item, Container destinationContainer, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             Plugin.Debug($"[{DbgId}] RemoveItem '{item?.m_shared?.m_name ?? "null"}' pulled by hopper");
             lastPullFrame = HopperHelper.GetFixedFrameCount();
-            containerTarget.RemoveItem(item, destination, destinationPos, sender, amount);
+            containerTarget.RemoveItem(item, destinationContainer, destinationPos, sender, amount);
         }
 
         private void PushItems() {
@@ -128,7 +128,7 @@ namespace ValheimPipes.Logic {
 
             if (item != null) {
                 Plugin.Debug($"[{DbgId}] Pushing '{item.m_shared?.m_name ?? "null"}' -> target [{idx}] ({to.GetType().Name}) (counter={OutputCounter})");
-                to.AddItem(item, container.GetInventory(), zNetView.m_zdo.m_uid);
+                to.AddItem(item, container, zNetView.GetZDO().m_uid);
                 HopperHelper.NotifyChange(this);
                 HopperHelper.NotifyChange(to);
             } else {

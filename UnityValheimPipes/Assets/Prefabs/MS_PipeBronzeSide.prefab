@@ -89,6 +89,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -189,7 +192,7 @@ GameObject:
   - component: {fileID: 1267024504742324382}
   - component: {fileID: 6207457818320814716}
   - component: {fileID: 4495049251837348880}
-  - component: {fileID: 385621934946697939}
+  - component: {fileID: 3798057653579188194}
   m_Layer: 10
   m_Name: MS_PipeBronzeSide
   m_TagString: Untagged
@@ -279,6 +282,7 @@ MonoBehaviour:
   m_canRotate: 1
   m_randomInitBuildRotation: 0
   m_canBeRemoved: 1
+  m_canRockJade: 0
   m_allowRotatedOverlap: 0
   m_vegetationGroundOnly: 0
   m_blockingPieces: []
@@ -444,7 +448,7 @@ MonoBehaviour:
   m_rootObjectOverride: {fileID: 0}
   m_wagon: {fileID: 0}
   m_destroyedLootPrefab: {fileID: 0}
---- !u!114 &385621934946697939
+--- !u!114 &3798057653579188194
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -453,14 +457,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 5734096175531377020}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -1267689374, guid: ede655af59964684191742c3107fbfe8, type: 3}
+  m_Script: {fileID: -1123818067, guid: 294faea114fa0e34d8fcd07d3b33296a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inPos: {x: 0, y: 0, z: 1.6}
-  outPos: {x: 0, y: 0, z: -1.3}
-  inSize: {x: 0.5, y: 0.5, z: 0.5}
-  outSize: {x: 0.5, y: 0.5, z: 0.5}
-  nearSize: {x: 1.25, y: 1.25, z: 4}
+  inPos: {x: 0, y: 0, z: 1.55}
+  outPos: {x: 0, y: 0, z: -1.15}
+  inSize: {x: 0.4, y: 0.4, z: 0.4}
+  outSize: {x: 0.4, y: 0.4, z: 0.4}
 --- !u!1 &6211811094485023929
 GameObject:
   m_ObjectHideFlags: 0
@@ -574,6 +577,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

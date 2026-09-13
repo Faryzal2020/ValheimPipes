@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 183249371542528070, guid: e97c86f24203c17469d7ca487991d3ad,
         type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 826d4168723afd74ab95015a2fcd0615, type: 2}
     - target: {fileID: 212722826587757620, guid: e97c86f24203c17469d7ca487991d3ad,
@@ -119,11 +119,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8964872472225964356, guid: e97c86f24203c17469d7ca487991d3ad,
         type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 826d4168723afd74ab95015a2fcd0615, type: 2}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6886201475404186319, guid: e97c86f24203c17469d7ca487991d3ad, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8787115508912242616, guid: e97c86f24203c17469d7ca487991d3ad,
+        type: 3}
+      insertIndex: 2
+      addedObject: {fileID: 6211980327601522619}
   m_SourcePrefab: {fileID: 100100000, guid: e97c86f24203c17469d7ca487991d3ad, type: 3}
+--- !u!1 &8579098405355273779 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8787115508912242616, guid: e97c86f24203c17469d7ca487991d3ad,
+    type: 3}
+  m_PrefabInstance: {fileID: 1080035379120701835}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6211980327601522619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8579098405355273779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1123818067, guid: 294faea114fa0e34d8fcd07d3b33296a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inPos: {x: 0, y: 0.81, z: 0}
+  outPos: {x: 0, y: -0.26, z: -0.65}
+  inSize: {x: 1.2, y: 0.5, z: 0.6}
+  outSize: {x: 0.4, y: 0.4, z: 0.4}

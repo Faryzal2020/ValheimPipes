@@ -1,3 +1,4 @@
+using MultiUserChest;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -55,7 +56,7 @@ namespace ValheimPipes.Logic {
             }
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
+        public void RemoveItem(ItemDrop.ItemData item, Container destinationContainer, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             if (zNetView == null || !zNetView.IsValid() || collectorComponent == null) return;
 
             if (!zNetView.IsOwner()) {
@@ -75,7 +76,7 @@ namespace ValheimPipes.Logic {
                 zNetView.GetZDO().Set("level", 0);
             }
 
-            destination.AddItem(item.Clone(), level, destinationPos.x, destinationPos.y);
+            destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, level);
         }
 
         private int GetCurrentLevel() {

@@ -1,3 +1,4 @@
+using MultiUserChest;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -142,9 +143,8 @@ namespace ValheimPipes.Logic {
             return cookingStation.GetFreeSlot() != -1;
         }
 
-        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender, int amount = 1) {
-            bool removed = source.RemoveItem(item, amount);
-            if (!removed) return;
+        public void AddItem(ItemDrop.ItemData item, Container sourceContainer, ZDOID sender, int amount = 1) {
+            sourceContainer.RemoveItemFromChest(item, null, new Vector2i(-1, -1), sender, amount);
 
             if (IsFuelItem(item)) {
                 cookingStation.m_nview.InvokeRPC("RPC_AddFuel");
@@ -191,7 +191,7 @@ namespace ValheimPipes.Logic {
             return result;
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
+        public void RemoveItem(ItemDrop.ItemData item, Container destinationContainer, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             int slotCount = cookingStation.m_slots.Length;
             ZDO zdo = cookingStation.m_nview.GetZDO();
 
@@ -213,7 +213,7 @@ namespace ValheimPipes.Logic {
                 // Force the visual to clear via the broadcast RPC
                 cookingStation.m_nview.InvokeRPC(ZNetView.Everybody, "RPC_SetSlotVisual", i, "");
 
-                destination.AddItem(item.Clone(), 1, destinationPos.x, destinationPos.y);
+                destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, 1);
                 Plugin.Debug($"RemoveItem: cleared slot {i} ({slotItem}) via ZDO write");
                 return;
             }

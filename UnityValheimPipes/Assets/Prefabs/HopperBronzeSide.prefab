@@ -263,6 +263,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -346,6 +349,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -429,6 +435,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -512,6 +521,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -786,7 +798,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5220840151356163939}
   - component: {fileID: 1307169204996416804}
-  - component: {fileID: 1570501928756610043}
+  - component: {fileID: 6886201475404186319}
   - component: {fileID: 4759853200739378548}
   - component: {fileID: 363003074246785806}
   - component: {fileID: 212722826587757620}
@@ -841,7 +853,7 @@ MonoBehaviour:
   m_distant: 0
   m_type: 0
   m_syncInitialScale: 0
---- !u!114 &1570501928756610043
+--- !u!114 &6886201475404186319
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -850,14 +862,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 8787115508912242616}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -1267689374, guid: ede655af59964684191742c3107fbfe8, type: 3}
+  m_Script: {fileID: -1123818067, guid: 294faea114fa0e34d8fcd07d3b33296a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   inPos: {x: 0, y: 0.81, z: 0}
   outPos: {x: 0, y: -0.26, z: -0.65}
   inSize: {x: 1.2, y: 0.5, z: 0.6}
   outSize: {x: 0.4, y: 0.4, z: 0.4}
-  nearSize: {x: 1.5, y: 1.5, z: 1.5}
 --- !u!114 &4759853200739378548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -903,6 +914,7 @@ MonoBehaviour:
   m_canRotate: 1
   m_randomInitBuildRotation: 0
   m_canBeRemoved: 1
+  m_canRockJade: 0
   m_allowRotatedOverlap: 0
   m_vegetationGroundOnly: 0
   m_blockingPieces: []

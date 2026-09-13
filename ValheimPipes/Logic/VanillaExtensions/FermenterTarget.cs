@@ -1,3 +1,4 @@
+using MultiUserChest;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,7 +35,7 @@ namespace ValheimPipes.Logic {
             }
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
+        public void RemoveItem(ItemDrop.ItemData item, Container destinationContainer, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             if (!fermenter.m_nview.IsOwner()) {
                 fermenter.m_nview.InvokeRPC(RequestOwnershipRPC);
                 return;
@@ -58,7 +59,7 @@ namespace ValheimPipes.Logic {
             // To be fair and simple, we add the full stack if it's mead, 
             // or 1 if it's a custom collector.
             int count = item.m_shared.m_name.Contains("mead") ? 6 : 1;
-            destination.AddItem(item.Clone(), count, destinationPos.x, destinationPos.y);
+            destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, count);
         }
 
         private void RPC_RequestOwnership(long sender) {

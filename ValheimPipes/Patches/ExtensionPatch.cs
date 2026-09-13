@@ -6,21 +6,21 @@ using UnityEngine;
 namespace ValheimPipes.Patches {
     [HarmonyPatch]
     public class ExtensionPatch {
-        [HarmonyPatch(typeof(Container), nameof(Container.Awake)), HarmonyPostfix]
+        [HarmonyPatch(typeof(Container), "Awake"), HarmonyPostfix]
         private static void ContainerAwakePostfix(Container __instance) {
             if (!__instance.GetComponent<ContainerTarget>()) {
                 __instance.gameObject.AddComponent<ContainerTarget>();
             }
         }
 
-        [HarmonyPatch(typeof(ItemDrop), nameof(ItemDrop.Awake)), HarmonyPostfix]
+        [HarmonyPatch(typeof(ItemDrop), "Awake"), HarmonyPostfix]
         private static void ItemDropAwakePostfix(ItemDrop __instance) {
             if (!__instance.GetComponent<ItemDropTarget>()) {
                 __instance.gameObject.AddComponent<ItemDropTarget>();
             }
         }
 
-        [HarmonyPatch(typeof(Smelter), nameof(Smelter.Awake)), HarmonyPostfix]
+        [HarmonyPatch(typeof(Smelter), "Awake"), HarmonyPostfix]
         private static void SmelterAwakePostfix(Smelter __instance) {
             if (__instance.m_addWoodSwitch && !__instance.GetComponent<SmelterFuelTarget>()) {
                 __instance.gameObject.AddComponent<SmelterFuelTarget>();
@@ -35,35 +35,35 @@ namespace ValheimPipes.Patches {
             }
         }
 
-        [HarmonyPatch(typeof(Beehive), nameof(Beehive.Awake)), HarmonyPostfix]
+        [HarmonyPatch(typeof(Beehive), "Awake"), HarmonyPostfix]
         private static void BeehiveAwakePostfix(Beehive __instance) {
             if (!__instance.GetComponent<BeehiveTarget>()) {
                 __instance.gameObject.AddComponent<BeehiveTarget>();
             }
         }
 
-        [HarmonyPatch(typeof(Turret), nameof(Turret.Awake)), HarmonyPostfix]
+        [HarmonyPatch(typeof(Turret), "Awake"), HarmonyPostfix]
         private static void TurretAwakePostfix(Turret __instance) {
             if (!__instance.GetComponent<TurretTarget>()) {
                 __instance.gameObject.AddComponent<TurretTarget>();
             }
         }
 
-        [HarmonyPatch(typeof(CookingStation), nameof(CookingStation.Awake)), HarmonyPostfix]
+        [HarmonyPatch(typeof(CookingStation), "Awake"), HarmonyPostfix]
         private static void CookingStationAwakePostfix(CookingStation __instance) {
             if (!__instance.GetComponent<CookingStationTarget>()) {
                 __instance.gameObject.AddComponent<CookingStationTarget>();
             }
         }
 
-        [HarmonyPatch(typeof(Fireplace), nameof(Fireplace.Awake)), HarmonyPostfix]
+        [HarmonyPatch(typeof(Fireplace), "Awake"), HarmonyPostfix]
         private static void FireplaceAwakePostfix(Fireplace __instance) {
             if (!__instance.GetComponent<FireplaceFuelTarget>()) {
                 __instance.gameObject.AddComponent<FireplaceFuelTarget>();
             }
         }
 
-        [HarmonyPatch(typeof(ZNetScene), nameof(ZNetScene.Awake)), HarmonyPostfix]
+        [HarmonyPatch(typeof(ZNetScene), "Awake"), HarmonyPostfix]
         private static void ZNetSceneAwakePostfix(ZNetScene __instance) {
             if (string.IsNullOrEmpty(Plugin.ExtraCompatiblePrefabs.Value)) return;
 
