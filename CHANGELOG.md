@@ -1,5 +1,10 @@
 # Changelog
 
+1.1.0
+- Initial Stable Release for Valheim 1.0.
+- Added Hopper filter slots support with persistent inventory.
+- Optimized transfer algorithms and shrunk hopper/pipe bounding boxes by ~50% to prevent unexpected cross-connections.
+
 1.0.1
 - Improved item distribution algorithm: transfers, hopper pulls, and pipe pushes are now asynchronous. This makes item distribution more predictable, especially when splitting throughput through hoppers.
 - Unified item transfer rates based on material:

@@ -155,11 +155,13 @@ if ($ChangelogFile -and (Test-Path $ChangelogFile)) {
 # -------------------------------------------------------------
 Write-Host "`n--- Synchronizing Version to $Version ---" -ForegroundColor Cyan
 
+$utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+
 # 6a. manifest.json
 if (Test-Path $manifestPath) {
     $content = Get-Content $manifestPath -Raw
-    $updated = $content -replace '("version_number"\s*:\s*")[^"]+(")', "`$1$Version`$2"
-    [System.IO.File]::WriteAllText($manifestPath, $updated, [System.Text.Encoding]::UTF8)
+    $updated = [regex]::Replace($content, '(?<="version_number"\s*:\s*")[^"]+(?=")', $Version)
+    [System.IO.File]::WriteAllText($manifestPath, $updated, $utf8NoBom)
     Write-Host "[OK] Updated manifest.json" -ForegroundColor Green
 }
 
@@ -167,8 +169,8 @@ if (Test-Path $manifestPath) {
 $csprojPath = "$RepoRoot/ValheimPipes/ValheimPipes.csproj"
 if (Test-Path $csprojPath) {
     $content = Get-Content $csprojPath -Raw
-    $updated = $content -replace '(<Version>)[^<]+(</Version>)', "`$1$Version`$2"
-    [System.IO.File]::WriteAllText($csprojPath, $updated, [System.Text.Encoding]::UTF8)
+    $updated = [regex]::Replace($content, '(?<=<Version>)[^<]+(?=</Version>)', $Version)
+    [System.IO.File]::WriteAllText($csprojPath, $updated, $utf8NoBom)
     Write-Host "[OK] Updated ValheimPipes.csproj" -ForegroundColor Green
 }
 
@@ -176,8 +178,8 @@ if (Test-Path $csprojPath) {
 $pluginPath = "$RepoRoot/ValheimPipes/Plugin.cs"
 if (Test-Path $pluginPath) {
     $content = Get-Content $pluginPath -Raw
-    $updated = $content -replace '(public const string ModVersion = ")[^"]+(";)', "`$1$Version`$2"
-    [System.IO.File]::WriteAllText($pluginPath, $updated, [System.Text.Encoding]::UTF8)
+    $updated = [regex]::Replace($content, '(?<=public const string ModVersion = ")[^"]+(?=";)', $Version)
+    [System.IO.File]::WriteAllText($pluginPath, $updated, $utf8NoBom)
     Write-Host "[OK] Updated Plugin.cs ModVersion" -ForegroundColor Green
 }
 
@@ -192,7 +194,7 @@ if (Test-Path $changelogPath) {
         } else {
             $updatedCl = "# Changelog`n`n$newSection$clContent"
         }
-        [System.IO.File]::WriteAllText($changelogPath, $updatedCl, [System.Text.Encoding]::UTF8)
+        [System.IO.File]::WriteAllText($changelogPath, $updatedCl, $utf8NoBom)
         Write-Host "[OK] Updated CHANGELOG.md" -ForegroundColor Green
     }
 }
