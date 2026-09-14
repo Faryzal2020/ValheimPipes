@@ -1,6 +1,7 @@
 using MultiUserChest;
 using System.Collections.Generic;
 using UnityEngine;
+using ValheimPipes.Logic.Helper;
 
 namespace ValheimPipes.Logic {
     public class FermenterTarget : NetworkPiece, IPullTarget {
@@ -59,7 +60,7 @@ namespace ValheimPipes.Logic {
             // To be fair and simple, we add the full stack if it's mead, 
             // or 1 if it's a custom collector.
             int count = item.m_shared.m_name.Contains("mead") ? 6 : 1;
-            destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, count);
+            destinationContainer.AddItemDirect(item, destinationPos, count);
         }
 
         private void RPC_RequestOwnership(long sender) {

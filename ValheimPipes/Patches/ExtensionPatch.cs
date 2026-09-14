@@ -8,6 +8,7 @@ namespace ValheimPipes.Patches {
     public class ExtensionPatch {
         [HarmonyPatch(typeof(Container), "Awake"), HarmonyPostfix]
         private static void ContainerAwakePostfix(Container __instance) {
+            if (!__instance.m_rootObjectOverride && !__instance.GetComponent<ZNetView>()) return;
             if (!__instance.GetComponent<ContainerTarget>()) {
                 __instance.gameObject.AddComponent<ContainerTarget>();
             }
@@ -65,7 +66,7 @@ namespace ValheimPipes.Patches {
 
         [HarmonyPatch(typeof(ZNetScene), "Awake"), HarmonyPostfix]
         private static void ZNetSceneAwakePostfix(ZNetScene __instance) {
-            if (string.IsNullOrEmpty(Plugin.ExtraCompatiblePrefabs.Value)) return;
+            if (Plugin.ExtraCompatiblePrefabs == null || string.IsNullOrEmpty(Plugin.ExtraCompatiblePrefabs.Value)) return;
 
             string[] names = Plugin.ExtraCompatiblePrefabs.Value.Split(',').Select(x => x.Trim()).ToArray();
             foreach (string name in names) {

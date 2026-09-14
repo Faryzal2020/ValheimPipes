@@ -11,36 +11,64 @@ if (-not (Test-Path "$OutputDir/$ModName.dll")) {
     exit 1
 }
 
-# Optional: Read install folder from environment (for local deployment)
+# Optional: Read install folders from environment (for local deployment)
 $ValheimInstall = $null
 $R2ModmanInstall = $null
+$GaleInstall = $null
 $UseR2ModmanPath = $false
+$UseGalePath = $false
 
 if (Test-Path "$PSScriptRoot/Environment.props") {
     [xml]$props = Get-Content "$PSScriptRoot/Environment.props"
     # MSBuild files have a namespace, so we use GetElementsByTagName for simplicity
-    $ValheimInstall = $props.GetElementsByTagName("VALHEIM_INSTALL")[0].InnerText
-    $R2ModmanInstall = $props.GetElementsByTagName("R2MODMAN_INSTALL")[0].InnerText
-    if ($props.GetElementsByTagName("USE_R2MODMAN_AS_DEPLOY_FOLDER")[0].InnerText -eq "true") {
+    if ($props.GetElementsByTagName("VALHEIM_INSTALL").Count -gt 0) {
+        $ValheimInstall = $props.GetElementsByTagName("VALHEIM_INSTALL")[0].InnerText
+    }
+    if ($props.GetElementsByTagName("R2MODMAN_INSTALL").Count -gt 0) {
+        $R2ModmanInstall = $props.GetElementsByTagName("R2MODMAN_INSTALL")[0].InnerText
+    }
+    if ($props.GetElementsByTagName("USE_R2MODMAN_AS_DEPLOY_FOLDER").Count -gt 0 -and $props.GetElementsByTagName("USE_R2MODMAN_AS_DEPLOY_FOLDER")[0].InnerText -eq "true") {
         $UseR2ModmanPath = $true
+    }
+    if ($props.GetElementsByTagName("GALE_INSTALL").Count -gt 0) {
+        $GaleInstall = $props.GetElementsByTagName("GALE_INSTALL")[0].InnerText
+    }
+    if ($props.GetElementsByTagName("USE_GALE_AS_DEPLOY_FOLDER").Count -gt 0 -and $props.GetElementsByTagName("USE_GALE_AS_DEPLOY_FOLDER")[0].InnerText -eq "true") {
+        $UseGalePath = $true
     }
 }
 
-# set BepInExFolder
-$BepInExFolder = $null
-if ($UseR2ModmanPath -and $R2ModmanInstall) {
-    $BepInExFolder = "$R2ModmanInstall/BepInEx"
-} elseif ($ValheimInstall) {
-    $BepInExFolder = "$ValheimInstall/BepInEx"
+# Collect target BepInEx plugin folders
+$DeployTargets = [System.Collections.Generic.List[string]]::new()
+
+if ($UseGalePath -and $GaleInstall -and (Test-Path "$GaleInstall/BepInEx")) {
+    $DeployTargets.Add("$GaleInstall/BepInEx")
+}
+if ($UseR2ModmanPath -and $R2ModmanInstall -and (Test-Path "$R2ModmanInstall/BepInEx")) {
+    $DeployTargets.Add("$R2ModmanInstall/BepInEx")
+}
+if ($DeployTargets.Count -eq 0 -and $ValheimInstall -and (Test-Path "$ValheimInstall/BepInEx")) {
+    $DeployTargets.Add("$ValheimInstall/BepInEx")
 }
 
-if ($BepInExFolder) {
-    $PluginFolder = "$BepInExFolder/plugins"
+foreach ($targetBepInEx in $DeployTargets) {
+    $PluginFolder = "$targetBepInEx/plugins"
     $ModDir = "$PluginFolder/$ModName"
 
-    Write-Host "Deploying to local game folder: $ModDir" -ForegroundColor Cyan
-    if (-not (Test-Path $ModDir)) { New-Item -ItemType Directory -Path $ModDir -Force }
-    Copy-Item "$OutputDir/$ModName.dll" $ModDir -Force
+    Write-Host "Deploying to mod profile folder: $ModDir" -ForegroundColor Cyan
+    $destDll = "$ModDir/$ModName.dll"
+    if (Test-Path $destDll) {
+        try {
+            Copy-Item "$OutputDir/$ModName.dll" $ModDir -Force -ErrorAction Stop
+        } catch {
+            $oldDll = "$ModDir/$ModName.dll.old"
+            if (Test-Path $oldDll) { Remove-Item $oldDll -Force -ErrorAction SilentlyContinue }
+            Move-Item $destDll $oldDll -Force -ErrorAction SilentlyContinue
+            Copy-Item "$OutputDir/$ModName.dll" $ModDir -Force
+        }
+    } else {
+        Copy-Item "$OutputDir/$ModName.dll" $ModDir -Force
+    }
     if (Test-Path "$OutputDir/$ModName.pdb") { Copy-Item "$OutputDir/$ModName.pdb" $ModDir -Force }
     if (Test-Path "$OutputDir/$ModName.dll.mdb") { Copy-Item "$OutputDir/$ModName.dll.mdb" $ModDir -Force }
     Copy-Item "$PSScriptRoot/README.md" $ModDir -Force
@@ -61,26 +89,32 @@ if (-not (Test-Path $UnityBundles)) { New-Item -ItemType Directory -Path $UnityB
 Copy-Item "$OutputDir/$ModName.dll" $UnityAssemblies -Force
 
 # 2. Copy BepInEx core DLLs (matching deploy.sh)
-if ($BepInExFolder -and (Test-Path "$BepInExFolder/core")) {
-    $CoreLibs = @("BepInEx.dll", "0Harmony.dll", "Mono.Cecil.dll", "MonoMod.Utils.dll", "MonoMod.RuntimeDetour.dll")
-    foreach ($lib in $CoreLibs) {
-        if (Test-Path "$BepInExFolder/core/$lib") {
-            Copy-Item "$BepInExFolder/core/$lib" $UnityAssemblies -Force
+$CoreLibs = @("BepInEx.dll", "0Harmony.dll", "Mono.Cecil.dll", "MonoMod.Utils.dll", "MonoMod.RuntimeDetour.dll")
+foreach ($targetBepInEx in $DeployTargets) {
+    if (Test-Path "$targetBepInEx/core") {
+        foreach ($lib in $CoreLibs) {
+            if (Test-Path "$targetBepInEx/core/$lib") {
+                Copy-Item "$targetBepInEx/core/$lib" $UnityAssemblies -Force
+            }
         }
+        break
     }
 }
 
 # 3. Copy common plugins (matching deploy.sh fallbacks)
-if ($PluginFolder) {
-    $PluginPaths = @(
-        "MSchmoecker-MultiUserChest/MultiUserChest.dll",
-        "MultiUserChest/MultiUserChest.dll",
-        "ValheimModding-Jotunn/Jotunn.dll",
-        "Jotunn/Jotunn.dll"
-    )
-    foreach ($p in $PluginPaths) {
-        if (Test-Path "$PluginFolder/$p") {
-            Copy-Item "$PluginFolder/$p" $UnityAssemblies -Force
+$PluginPaths = @(
+    "MSchmoecker-MultiUserChest/MultiUserChest.dll",
+    "MultiUserChest/MultiUserChest.dll",
+    "ValheimModding-Jotunn/Jotunn.dll",
+    "Jotunn/Jotunn.dll"
+)
+foreach ($targetBepInEx in $DeployTargets) {
+    $targetPlugins = "$targetBepInEx/plugins"
+    if (Test-Path $targetPlugins) {
+        foreach ($p in $PluginPaths) {
+            if (Test-Path "$targetPlugins/$p") {
+                Copy-Item "$targetPlugins/$p" $UnityAssemblies -Force
+            }
         }
     }
 }

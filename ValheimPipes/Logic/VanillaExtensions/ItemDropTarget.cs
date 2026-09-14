@@ -42,7 +42,7 @@ namespace ValheimPipes.Logic {
                 itemDrop.m_nview.GetZDO().Set(ZDOVars.s_stack, itemDrop.m_itemData.m_stack);
             }
 
-            destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, toRemove);
+            destinationContainer.AddItemDirect(item, destinationPos, toRemove);
         }
 
         public bool InRange(Vector3 position) {

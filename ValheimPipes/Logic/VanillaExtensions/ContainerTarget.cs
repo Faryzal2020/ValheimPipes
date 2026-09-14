@@ -31,11 +31,19 @@ namespace ValheimPipes.Logic {
         }
 
         public void AddItem(ItemDrop.ItemData item, Container sourceContainer, ZDOID sender, int amount = 1) {
-            container.AddItemToChest(item, sourceContainer?.GetInventory(), new Vector2i(-1, -1), sender, amount);
+            if (sourceContainer != null && sourceContainer.GetInventory() != null) {
+                container.AddItemToChest(item, sourceContainer.GetInventory(), new Vector2i(-1, -1), sender, amount);
+            } else {
+                container.AddItemDirect(item, new Vector2i(-1, -1), amount);
+            }
         }
 
         public void RemoveItem(ItemDrop.ItemData item, Container destinationContainer, Vector2i destinationPos, ZDOID sender, int amount = 1) {
-            container.RemoveItemFromChest(item, destinationContainer?.GetInventory(), destinationPos, sender, amount);
+            if (destinationContainer != null && destinationContainer.GetInventory() != null) {
+                container.RemoveItemFromChest(item, destinationContainer.GetInventory(), destinationPos, sender, amount);
+            } else {
+                container.GetInventory().RemoveItem(item, amount);
+            }
         }
 
         public bool CanAddItem(ItemDrop.ItemData item) {

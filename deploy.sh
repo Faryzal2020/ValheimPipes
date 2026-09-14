@@ -18,10 +18,18 @@ while read_dom; do
 	if [[ $ENTITY = "USE_R2MODMAN_AS_DEPLOY_FOLDER" ]]; then
 		USE_R2MODMAN_AS_DEPLOY_FOLDER=$CONTENT
 	fi
+	if [[ $ENTITY = "GALE_INSTALL" ]]; then
+		GALE_INSTALL=$CONTENT
+	fi
+	if [[ $ENTITY = "USE_GALE_AS_DEPLOY_FOLDER" ]]; then
+		USE_GALE_AS_DEPLOY_FOLDER=$CONTENT
+	fi
 done < Environment.props
 
 # set ModDir
-if $USE_R2MODMAN_AS_DEPLOY_FOLDER; then
+if [[ "$USE_GALE_AS_DEPLOY_FOLDER" = "true" ]] && [[ -n "$GALE_INSTALL" ]]; then
+  BepInExFolder="$GALE_INSTALL/BepInEx"
+elif [[ "$USE_R2MODMAN_AS_DEPLOY_FOLDER" = "true" ]] && [[ -n "$R2MODMAN_INSTALL" ]]; then
   BepInExFolder="$R2MODMAN_INSTALL/BepInEx"
 else
 	BepInExFolder="$VALHEIM_INSTALL/BepInEx"

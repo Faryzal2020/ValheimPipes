@@ -10,7 +10,7 @@ namespace ValheimPipes.Logic {
         public bool IsPickup { get; } = false;
 
         [SerializeField] private Vector3 outPos = new Vector3(0, 0, -1f);
-        [SerializeField] private Vector3 outSize = new Vector3(0.25f, 0.5f, 0.5f);
+        [SerializeField] private Vector3 outSize = new Vector3(0.125f, 0.25f, 0.25f);
 
         private Container container;
         private ContainerTarget containerTarget;
@@ -115,26 +115,29 @@ namespace ValheimPipes.Logic {
                 return;
             }
 
-            int idx = OutputCounter % pushTo.Count;
-            IPushTarget to = pushTo[idx];
-            OutputCounter++;
+            int startIndex = OutputCounter % pushTo.Count;
+            for (int attempt = 0; attempt < pushTo.Count; attempt++) {
+                int idx = (startIndex + attempt) % pushTo.Count;
+                IPushTarget to = pushTo[idx];
 
-            if (!to.IsValid()) {
-                Plugin.Debug($"[{DbgId}] Push target [{idx}] invalid, skipping");
-                return;
+                if (!to.IsValid()) {
+                    continue;
+                }
+
+                ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i));
+
+                if (item != null) {
+                    OutputCounter = idx + 1;
+                    Plugin.Debug($"[{DbgId}] Pushing '{item.m_shared?.m_name ?? "null"}' -> target [{idx}] ({to.GetType().Name})");
+                    to.AddItem(item, container, zNetView.GetZDO().m_uid);
+                    HopperHelper.NotifyChange(this);
+                    HopperHelper.NotifyChange(to);
+                    return;
+                }
             }
 
-            ItemDrop.ItemData item = container.GetInventory().FindLastItem(i => to.CanAddItem(i));
-
-            if (item != null) {
-                Plugin.Debug($"[{DbgId}] Pushing '{item.m_shared?.m_name ?? "null"}' -> target [{idx}] ({to.GetType().Name}) (counter={OutputCounter})");
-                to.AddItem(item, container, zNetView.GetZDO().m_uid);
-                HopperHelper.NotifyChange(this);
-                HopperHelper.NotifyChange(to);
-            } else {
-                Plugin.Debug($"[{DbgId}] No pushable item for target [{idx}] ({to.GetType().Name}) (full or filtered)");
-                IsPushBlocked = true;
-            }
+            Plugin.Debug($"[{DbgId}] No targets could accept item (full or filtered)");
+            IsPushBlocked = true;
         }
 
         private void FindIO() {

@@ -109,5 +109,17 @@ namespace ValheimPipes.Logic.Helper {
 
             return collider.ClosestPoint(point) == point;
         }
+
+        public static bool AddItemDirect(this Container destinationContainer, ItemDrop.ItemData item, Vector2i destinationPos, int amount) {
+            if (destinationContainer == null || destinationContainer.GetInventory() == null) return false;
+            ItemDrop.ItemData clone = item.Clone();
+            clone.m_stack = amount;
+            if (destinationPos.x >= 0 && destinationPos.y >= 0) {
+                if (destinationContainer.GetInventory().AddItem(clone, amount, destinationPos.x, destinationPos.y, false)) {
+                    return true;
+                }
+            }
+            return destinationContainer.GetInventory().AddItem(clone);
+        }
     }
 }

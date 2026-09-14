@@ -65,7 +65,7 @@ namespace ValheimPipes.Logic {
 
             smelter.m_nview.ClaimOwnership();
             zdo.Set("SpawnAmount", count - toRemove);
-            destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, toRemove);
+            destinationContainer.AddItemDirect(item, destinationPos, toRemove);
             
             Plugin.Debug($"RemoveItem: removed {toRemove} {item.m_shared.m_name} from Windmill via ZDO write");
         }

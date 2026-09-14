@@ -42,7 +42,7 @@ namespace ValheimPipes.Logic {
             }
  
             beehive.m_nview.GetZDO().Set(ZDOVars.s_level, honeyLevel - toRemove);
-            destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, toRemove);
+            destinationContainer.AddItemDirect(item, destinationPos, toRemove);
         }
 
         private void RPC_RequestOwnership(long sender) {

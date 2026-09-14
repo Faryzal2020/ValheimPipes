@@ -4,10 +4,10 @@ using ValheimPipes.Logic;
 using UnityEngine;
 
 namespace ValheimPipes.Patches {
-    [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddItem), new[] { typeof(ItemDrop.ItemData), typeof(int), typeof(int), typeof(int) })]
+    [HarmonyPatch(typeof(Inventory), nameof(Inventory.AddItem), new[] { typeof(ItemDrop.ItemData), typeof(int), typeof(int), typeof(int), typeof(bool) })]
     public static class InventoryPatch {
         [HarmonyPrefix]
-        public static bool AddItem_Prefix(Inventory __instance, ItemDrop.ItemData item, int amount, int x, int y) {
+        public static bool AddItem_Prefix(Inventory __instance, ItemDrop.ItemData item, int amount, int x, int y, bool skipValidPositionCheck) {
             // Check if HopperUI exists and if this inventory belongs to its filterContainer
             if (HopperUI.Instance != null) {
                 // We need access to filterContainer. We can either make it public or use Reflection.
@@ -56,6 +56,21 @@ namespace ValheimPipes.Patches {
             // Block Load() from running on our filter container
             if (HopperUI.Instance != null && __instance == HopperUI.Instance.FilterContainer)
                 return false;
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(Container), "Awake")]
+    public static class PatchContainerAwake {
+        static bool Prefix(Container __instance) {
+            // UI-only containers (e.g. HopperUI filterContainer) have no ZNetView.
+            // Valheim 1.0 Container.Awake calls m_nview.GetZDO() unconditionally, throwing NullReferenceException if m_nview is null.
+            if (!__instance.m_rootObjectOverride && !__instance.GetComponent<ZNetView>()) {
+                if (__instance.m_inventory == null) {
+                    __instance.m_inventory = new Inventory(__instance.m_name, __instance.m_bkg, __instance.m_width, __instance.m_height);
+                }
+                return false;
+            }
             return true;
         }
     }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using ValheimPipes.Logic.Helper;
 
 namespace ValheimPipes.Logic {
     public class ClayCollectorTarget : NetworkPiece, IPullTarget {
@@ -76,7 +77,7 @@ namespace ValheimPipes.Logic {
                 zNetView.GetZDO().Set("level", 0);
             }
 
-            destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, level);
+            destinationContainer.AddItemDirect(item, destinationPos, level);
         }
 
         private int GetCurrentLevel() {

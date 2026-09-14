@@ -213,7 +213,7 @@ namespace ValheimPipes.Logic {
                 // Force the visual to clear via the broadcast RPC
                 cookingStation.m_nview.InvokeRPC(ZNetView.Everybody, "RPC_SetSlotVisual", i, "");
 
-                destinationContainer.AddItemToChest(item.Clone(), null, destinationPos, sender, 1);
+                destinationContainer.AddItemDirect(item, destinationPos, 1);
                 Plugin.Debug($"RemoveItem: cleared slot {i} ({slotItem}) via ZDO write");
                 return;
             }

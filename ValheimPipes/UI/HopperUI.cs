@@ -1,7 +1,10 @@
+using System;
+using System.Linq;
 using Jotunn;
 using Jotunn.GUI;
 using Jotunn.Managers;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using ValheimPipes;
 using ValheimPipes.Logic;
@@ -9,10 +12,53 @@ using ValheimPipes.Logic;
 // NOTE: Namespace is ValheimHopper.UI for compatibility with the AssetBundle,
 // which expects this specific namespace for script references on UI prefabs.
 namespace ValheimPipes.UI {
+    public class FilterSlotClickHandler : MonoBehaviour, IPointerClickHandler, IDropHandler, IPointerEnterHandler, IPointerExitHandler {
+        public int SlotIndex;
+        public Action<int, PointerEventData.InputButton> OnClick;
+        public Image BackgroundImage;
+        private Color defaultColor = new Color(0f, 0f, 0f, 0.45f);
+        private static readonly Color HoverColor = new Color(0.25f, 0.25f, 0.25f, 0.7f);
+
+        public void SetDefaultColor(Color color) {
+            defaultColor = color;
+            if (BackgroundImage != null) BackgroundImage.color = defaultColor;
+        }
+
+        public void OnPointerClick(PointerEventData eventData) {
+            OnClick?.Invoke(SlotIndex, eventData.button);
+        }
+
+        public void OnDrop(PointerEventData eventData) {
+            OnClick?.Invoke(SlotIndex, eventData.button);
+        }
+
+        public void OnPointerEnter(PointerEventData eventData) {
+            if (BackgroundImage != null) {
+                BackgroundImage.color = HoverColor;
+            }
+        }
+
+        public void OnPointerExit(PointerEventData eventData) {
+            if (BackgroundImage != null) {
+                BackgroundImage.color = defaultColor;
+            }
+        }
+    }
+
     public class HopperUI : MonoBehaviour {
         public static HopperUI Instance { get; private set; }
         public static bool IsOpen { get; private set; }
         private static readonly Color WhiteShade = new Color(219f / 255f, 219f / 255f, 219f / 255f);
+
+        private class FilterSlotUI {
+            public int Index;
+            public GameObject SlotObject;
+            public Image BackgroundImage;
+            public Image IconImage;
+            public UITooltip Tooltip;
+        }
+
+        private readonly FilterSlotUI[] filterSlots = new FilterSlotUI[3];
 
         // Disable Field XYZ is never assigned to, and will always have its default value XX
         [SerializeField] private Text title;
@@ -29,6 +75,7 @@ namespace ValheimPipes.UI {
         [SerializeField] private Container filterContainer;
         public Container FilterContainer => filterContainer;
 
+        private static GameObject uiInstance;
         private static GameObject uiRoot;
         private Hopper target;
         private Hopper copy;
@@ -68,16 +115,23 @@ namespace ValheimPipes.UI {
             if (pasteButton != null) pasteButton.onClick.AddListener(() => {
                 if (target != null && copy != null && copy.IsValid()) {
                     target.PasteData(copy);
+                    UpdateText();
                 }
             });
-            if (resetButton != null) resetButton.onClick.AddListener(() => { if (target != null) target.ResetValues(); });
+            if (resetButton != null) resetButton.onClick.AddListener(() => {
+                if (target != null) {
+                    target.ResetValues();
+                    UpdateText();
+                }
+            });
         }
 
         public static void Init() {
             if (Instance != null) return;
  
-            if (GUIManager.CustomGUIFront == null) {
-                Jotunn.Logger.LogWarning("HopperUI: Cannot init because CustomGUIFront is null. Waiting...");
+            Transform parent = (InventoryGui.instance != null) ? InventoryGui.instance.transform : GUIManager.CustomGUIFront?.transform;
+            if (parent == null) {
+                Jotunn.Logger.LogWarning("HopperUI: Cannot init because parent canvas is null. Waiting...");
                 return;
             }
  
@@ -93,22 +147,44 @@ namespace ValheimPipes.UI {
                 DestroyImmediate(nv, true);
             }
  
-            GameObject obj = Instantiate(prefab, GUIManager.CustomGUIFront.transform, false);
-            obj.SetActive(false);
+            uiInstance = Instantiate(prefab, parent, false);
             
             // Robustly find the UI root (usually the first child)
-            uiRoot = obj.transform.childCount > 0 ? obj.transform.GetChild(0).gameObject : obj;
-            uiRoot.SetActive(false);
+            uiRoot = uiInstance.transform.childCount > 0 ? uiInstance.transform.GetChild(0).gameObject : uiInstance;
             
-            HopperUI ui = obj.GetComponent<HopperUI>();
+            HopperUI ui = uiInstance.GetComponent<HopperUI>();
             if (ui == null) {
                 Jotunn.Logger.LogWarning("HopperUI component missing on prefab!");
                 return;
             }
+
+            ApplyAllComponents(uiRoot);
+            if (ui.title != null) {
+                GUIManager.Instance.ApplyTextStyle(ui.title, GUIManager.Instance.AveriaSerifBold, GUIManager.Instance.ValheimOrange, 20);
+            }
+            ApplyLocalization();
+
+            if (uiRoot.GetComponent<DragWindowCntrl>() == null) {
+                uiRoot.AddComponent<DragWindowCntrl>();
+            }
+
+            ui.SetupFilterSlots();
+
+            uiRoot.FixReferences(true);
+            IsOpen = false;
+            uiRoot.SetActive(false);
+            uiInstance.SetActive(false);
  
             Jotunn.Logger.LogInfo("HopperUI: Successfully initialized custom UI instance.");
- 
-            uiRoot.FixReferences(true);
+        }
+
+        private void OnDestroy() {
+            if (Instance == this) {
+                Instance = null;
+                uiInstance = null;
+                uiRoot = null;
+                IsOpen = false;
+            }
         }
 
         public static void UpdateStatic() {
@@ -141,6 +217,7 @@ namespace ValheimPipes.UI {
 
         private void UpdateInstance(Hopper hopper) {
             target = hopper;
+            target.LoadFilterInventory();
             
             if (filterContainer == null) {
                 // Fallback: Try to find it by component if the serialize field is not set
@@ -165,7 +242,13 @@ namespace ValheimPipes.UI {
             }
 
             IsOpen = active;
-            uiRoot.SetActive(active);
+            if (uiInstance != null) {
+                uiInstance.SetActive(active);
+                if (active) {
+                    uiInstance.transform.SetAsLastSibling();
+                }
+            }
+            if (uiRoot != null) uiRoot.SetActive(active);
         }
 
         private void UpdateText() {
@@ -182,6 +265,171 @@ namespace ValheimPipes.UI {
             if (stackMode != null) {
                 bool isIron = target.name.Contains("Iron");
                 stackMode.gameObject.SetActive(isIron);
+            }
+
+            UpdateFilterSlots();
+        }
+
+        private static Sprite FindSlotBackgroundSprite() {
+            InventoryGui gui = InventoryGui.instance;
+            if (gui == null) return null;
+
+            if (gui.m_containerGrid != null) {
+                if (gui.m_containerGrid.m_elementPrefab != null) {
+                    var img = gui.m_containerGrid.m_elementPrefab.GetComponent<Image>() ?? gui.m_containerGrid.m_elementPrefab.GetComponentInChildren<Image>();
+                    if (img != null && img.sprite != null) return img.sprite;
+                }
+                if (gui.m_containerGrid.m_elements != null && gui.m_containerGrid.m_elements.Count > 0) {
+                    var elem = gui.m_containerGrid.m_elements[0];
+                    var img = elem.GetComponent<Image>();
+                    if (img != null && img.sprite != null) return img.sprite;
+                }
+            }
+            if (gui.m_playerGrid != null) {
+                if (gui.m_playerGrid.m_elementPrefab != null) {
+                    var img = gui.m_playerGrid.m_elementPrefab.GetComponent<Image>() ?? gui.m_playerGrid.m_elementPrefab.GetComponentInChildren<Image>();
+                    if (img != null && img.sprite != null) return img.sprite;
+                }
+                if (gui.m_playerGrid.m_elements != null && gui.m_playerGrid.m_elements.Count > 0) {
+                    var elem = gui.m_playerGrid.m_elements[0];
+                    var img = elem.GetComponent<Image>();
+                    if (img != null && img.sprite != null) return img.sprite;
+                }
+            }
+            return null;
+        }
+
+        private void SetupFilterSlots() {
+            if (uiRoot == null) return;
+
+            Sprite slotBkgSprite = FindSlotBackgroundSprite();
+            Color defaultColor = new Color(0f, 0f, 0f, 0.45f);
+
+            for (int i = 0; i < 3; i++) {
+                string slotName = $"Slot_{i}";
+                Transform slotTr = uiRoot.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == slotName);
+                if (slotTr == null) {
+                    Jotunn.Logger.LogWarning($"HopperUI: Could not find {slotName} in prefab!");
+                    continue;
+                }
+
+                GameObject slotGo = slotTr.gameObject;
+
+                // Remove any Button component immediately so Unity UI Selectable doesn't overwrite background color
+                Button existingBtn = slotGo.GetComponent<Button>();
+                if (existingBtn != null) DestroyImmediate(existingBtn);
+
+                Image bgImg = slotGo.GetComponent<Image>();
+                if (bgImg == null) bgImg = slotGo.AddComponent<Image>();
+
+                if (slotBkgSprite != null) {
+                    bgImg.sprite = slotBkgSprite;
+                    bgImg.type = Image.Type.Sliced;
+                } else {
+                    bgImg.sprite = null;
+                }
+                bgImg.color = defaultColor;
+
+                // Find or create _icon child
+                Transform iconTr = slotGo.transform.Find("_icon");
+                if (iconTr == null) {
+                    GameObject iconGo = new GameObject("_icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                    iconGo.transform.SetParent(slotGo.transform, false);
+                    iconTr = iconGo.transform;
+                }
+                Image iconImg = iconTr.GetComponent<Image>();
+                if (iconImg == null) iconImg = iconTr.gameObject.AddComponent<Image>();
+
+                RectTransform iconRect = iconImg.rectTransform;
+                iconRect.anchorMin = new Vector2(0.1f, 0.1f);
+                iconRect.anchorMax = new Vector2(0.9f, 0.9f);
+                iconRect.offsetMin = Vector2.zero;
+                iconRect.offsetMax = Vector2.zero;
+                iconImg.preserveAspect = true;
+                iconImg.raycastTarget = false; // clicks pass through to slot
+                iconImg.color = Color.white;
+                iconImg.enabled = false;
+
+                // UITooltip
+                UITooltip tooltip = slotGo.GetComponent<UITooltip>();
+                if (tooltip == null) tooltip = slotGo.AddComponent<UITooltip>();
+
+                // Click / Drop / Hover handler
+                int slotIdx = i;
+                FilterSlotClickHandler clickHandler = slotGo.GetComponent<FilterSlotClickHandler>();
+                if (clickHandler == null) clickHandler = slotGo.AddComponent<FilterSlotClickHandler>();
+                clickHandler.SlotIndex = slotIdx;
+                clickHandler.OnClick = OnSlotClicked;
+                clickHandler.BackgroundImage = bgImg;
+                clickHandler.SetDefaultColor(defaultColor);
+
+                filterSlots[i] = new FilterSlotUI {
+                    Index = slotIdx,
+                    SlotObject = slotGo,
+                    BackgroundImage = bgImg,
+                    IconImage = iconImg,
+                    Tooltip = tooltip
+                };
+            }
+        }
+
+        private void OnSlotClicked(int slotIndex, PointerEventData.InputButton button) {
+            if (target == null) return;
+
+            if (button == PointerEventData.InputButton.Right) {
+                target.ClearFilterItem(slotIndex);
+                UpdateFilterSlots();
+                return;
+            }
+
+            if (button == PointerEventData.InputButton.Left) {
+                InventoryGui gui = InventoryGui.instance;
+                if (gui != null && gui.m_dragItem != null) {
+                    target.SetFilterItem(slotIndex, gui.m_dragItem);
+                } else {
+                    target.ClearFilterItem(slotIndex);
+                }
+                UpdateFilterSlots();
+            }
+        }
+
+        private void UpdateFilterSlots() {
+            if (target == null) return;
+
+            Sprite slotBkgSprite = FindSlotBackgroundSprite();
+            Color defaultColor = new Color(0f, 0f, 0f, 0.45f);
+
+            for (int i = 0; i < filterSlots.Length; i++) {
+                FilterSlotUI slot = filterSlots[i];
+                if (slot == null) continue;
+
+                if (slot.BackgroundImage != null) {
+                    var handler = slot.SlotObject?.GetComponent<FilterSlotClickHandler>();
+                    if (slot.BackgroundImage.sprite == null && slotBkgSprite != null) {
+                        slot.BackgroundImage.sprite = slotBkgSprite;
+                        slot.BackgroundImage.type = Image.Type.Sliced;
+                    }
+                    slot.BackgroundImage.color = defaultColor;
+                    handler?.SetDefaultColor(defaultColor);
+                }
+
+                ItemDrop.ItemData item = target.GetFilterItem(i);
+                if (item != null) {
+                    slot.IconImage.sprite = item.GetIcon();
+                    slot.IconImage.color = Color.white;
+                    slot.IconImage.enabled = true;
+                    if (slot.Tooltip != null) {
+                        slot.Tooltip.m_topic = "";
+                        slot.Tooltip.m_text = item.m_shared != null ? Localization.instance.Localize(item.m_shared.m_name) : "";
+                    }
+                } else {
+                    slot.IconImage.sprite = null;
+                    slot.IconImage.enabled = false;
+                    if (slot.Tooltip != null) {
+                        slot.Tooltip.m_topic = "";
+                        slot.Tooltip.m_text = "";
+                    }
+                }
             }
         }
 
