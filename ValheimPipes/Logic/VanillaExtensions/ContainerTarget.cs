@@ -30,12 +30,20 @@ namespace ValheimPipes.Logic {
             return container.GetInventory().GetItemInReverseOrder();
         }
 
-        public void AddItem(ItemDrop.ItemData item, Inventory source, ZDOID sender, int amount = 1) {
-            container.AddItemToChest(item, source, new Vector2i(-1, -1), sender, amount);
+        public void AddItem(ItemDrop.ItemData item, Container sourceContainer, ZDOID sender, int amount = 1) {
+            if (sourceContainer != null && sourceContainer.GetInventory() != null) {
+                container.AddItemToChest(item, sourceContainer.GetInventory(), new Vector2i(-1, -1), sender, amount);
+            } else {
+                container.AddItemDirect(item, new Vector2i(-1, -1), amount);
+            }
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
-            container.RemoveItemFromChest(item, destination, destinationPos, sender, amount);
+        public void RemoveItem(ItemDrop.ItemData item, Container destinationContainer, Vector2i destinationPos, ZDOID sender, int amount = 1) {
+            if (destinationContainer != null && destinationContainer.GetInventory() != null) {
+                container.RemoveItemFromChest(item, destinationContainer.GetInventory(), destinationPos, sender, amount);
+            } else {
+                container.GetInventory().RemoveItem(item, amount);
+            }
         }
 
         public bool CanAddItem(ItemDrop.ItemData item) {

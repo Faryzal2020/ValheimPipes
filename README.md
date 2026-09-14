@@ -1,7 +1,6 @@
 # Valheim Pipes
 ## About
-Adds hoppers and pipes to transport items. 
-This is a fork of MSchmoecker's [ItemHopper](https://valheim.thunderstore.io/package/MSchmoecker/ItemHopper/) with several improvements and features.
+This is a fork of MSchmoecker's [ItemHopper](https://valheim.thunderstore.io/package/MSchmoecker/ItemHopper/) with several improvements and features. The concept, model, and all the base components of the codes belong to MSchmoecker and Bento#5066!
 
 The main difference is the improved item distribution algorithm. Where the original mod could be a bit unpredictable with throughput splitting, this fork uses monitored output neighbors scanning from the pipe to handle the push instead of asynchronous transfers between all the push/pulls from each hopper and pipes to make it more consistent and reliable.
 

@@ -1,3 +1,4 @@
+using MultiUserChest;
 using System.Collections.Generic;
 using UnityEngine;
 using ValheimPipes.Logic.Helper;
@@ -28,7 +29,7 @@ namespace ValheimPipes.Logic {
             }
         }
 
-        public void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1) {
+        public void RemoveItem(ItemDrop.ItemData item, Container destinationContainer, Vector2i destinationPos, ZDOID sender, int amount = 1) {
             if (!beehive.m_nview.IsOwner()) {
                 beehive.m_nview.InvokeRPC(RequestOwnershipRPC);
                 return;
@@ -41,7 +42,7 @@ namespace ValheimPipes.Logic {
             }
  
             beehive.m_nview.GetZDO().Set(ZDOVars.s_level, honeyLevel - toRemove);
-            destination.AddItem(item.Clone(), toRemove, destinationPos.x, destinationPos.y);
+            destinationContainer.AddItemDirect(item, destinationPos, toRemove);
         }
 
         private void RPC_RequestOwnership(long sender) {

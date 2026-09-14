@@ -8,6 +8,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 275964611883382614, guid: 75856e75e062fa0419a651dd480e8565,
+        type: 3}
+      propertyPath: inPos.x
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 648688154925022372, guid: 75856e75e062fa0419a651dd480e8565,
         type: 3}
       propertyPath: m_name
@@ -124,13 +129,47 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6129694188725213940, guid: 75856e75e062fa0419a651dd480e8565,
+        type: 3}
+      propertyPath: outPos.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8715203177857741256, guid: 75856e75e062fa0419a651dd480e8565,
         type: 3}
       propertyPath: m_Name
       value: MS_PipeBronze_Diagonal_26_Down_4m
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3619491198629147239, guid: 75856e75e062fa0419a651dd480e8565, type: 3}
+    - {fileID: 275964611883382614, guid: 75856e75e062fa0419a651dd480e8565, type: 3}
+    - {fileID: 6129694188725213940, guid: 75856e75e062fa0419a651dd480e8565, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8715203177857741256, guid: 75856e75e062fa0419a651dd480e8565,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4397791658707389553}
   m_SourcePrefab: {fileID: 100100000, guid: 75856e75e062fa0419a651dd480e8565, type: 3}
+--- !u!1 &105452379542504900 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8715203177857741256, guid: 75856e75e062fa0419a651dd480e8565,
+    type: 3}
+  m_PrefabInstance: {fileID: 8756188979793572876}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4397791658707389553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 105452379542504900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1123818067, guid: 294faea114fa0e34d8fcd07d3b33296a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inPos: {x: 0, y: 0.7, z: -1.5}
+  outPos: {x: 0, y: -0.6, z: 1.25}
+  inSize: {x: 0.4, y: 0.4, z: 0.4}
+  outSize: {x: 0.4, y: 0.4, z: 0.4}

@@ -3,3 +3,6 @@ Environment.props
 packages/*
 *.user
 dist/
+.env
+*.token
+.github_token

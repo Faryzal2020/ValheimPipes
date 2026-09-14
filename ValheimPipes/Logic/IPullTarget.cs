@@ -6,6 +6,6 @@ namespace ValheimPipes.Logic {
         bool IsPickup { get; }
 
         IEnumerable<ItemDrop.ItemData> GetItems();
-        void RemoveItem(ItemDrop.ItemData item, Inventory destination, Vector2i destinationPos, ZDOID sender, int amount = 1);
+        void RemoveItem(ItemDrop.ItemData item, Container destinationContainer, Vector2i destinationPos, ZDOID sender, int amount = 1);
     }
 }

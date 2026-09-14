@@ -4,7 +4,7 @@ using ValheimPipes.Logic;
 namespace ValheimPipes.Patches {
     [HarmonyPatch]
     public class PlacementPatch {
-        [HarmonyPatch(typeof(Player), nameof(Player.SetupPlacementGhost)), HarmonyPostfix]
+        [HarmonyPatch(typeof(Player), "SetupPlacementGhost"), HarmonyPostfix]
         public static void SetupPlacementGhostPatch(Player __instance) {
             if (!__instance.m_placementGhost) {
                 return;

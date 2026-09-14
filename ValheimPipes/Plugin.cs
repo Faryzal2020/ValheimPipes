@@ -9,8 +9,9 @@ using Jotunn.Entities;
 using Jotunn.Utils;
 using Jotunn.Managers;
 using ValheimPipes.Logic.Helper;
-using ValheimHopper.UI;
+using ValheimPipes.UI;
 using ValheimPipes.Logic;
+using UnityEngine.SceneManagement;
 
 namespace ValheimPipes {
     [BepInPlugin(ModGuid, ModName, ModVersion)]
@@ -21,7 +22,7 @@ namespace ValheimPipes {
     public class Plugin : BaseUnityPlugin {
         [PublicAPI] public const string ModName = "ValheimPipes";
         [PublicAPI] public const string ModGuid = "com.faryzal2020.valheim.ValheimPipes";
-        [PublicAPI] public const string ModVersion = "1.0.1";
+        [PublicAPI] public const string ModVersion = "1.1.0";
 
         private static ConfigEntry<bool> addSmelterSnappoints;
         private static ConfigEntry<bool> debugLogs;
@@ -85,7 +86,7 @@ namespace ValheimPipes {
             localization.AddJsonFile("Russian", AssetUtils.LoadTextFromResources("Localization.Russian.json"));
             localization.AddJsonFile("Portuguese_Brazilian", AssetUtils.LoadTextFromResources("Localization.Portuguese_Brazilian.json"));
 
-            AssetBundle = AssetUtils.LoadAssetBundleFromResources("ValheimHopper_AssetBundle");
+            AssetBundle = AssetUtils.LoadAssetBundleFromResources("valheimpipes_assetbundle");
 
             AddBronzePiece("HopperBronzeDown", 6, 4);
             AddBronzePiece("HopperBronzeSide", 6, 4);
@@ -103,7 +104,10 @@ namespace ValheimPipes {
             AddIronPiece("HopperIronSide", 6, 2);
 
             PrefabManager.OnVanillaPrefabsAvailable += AddSnappoints;
-            GUIManager.OnCustomGUIAvailable += HopperUI.Init;
+        }
+ 
+        private void Update() {
+            HopperUI.UpdateStatic();
         }
 
         private static void AddSnappoints() {
@@ -180,13 +184,42 @@ namespace ValheimPipes {
                     FieldInfo pipeOutPosField = typeof(Pipe).GetField("outPos", BindingFlags.NonPublic | BindingFlags.Instance);
                     FieldInfo pipeOutSizeField = typeof(Pipe).GetField("outSize", BindingFlags.NonPublic | BindingFlags.Instance);
                     
+                    Vector3 scaledOutSize = outSize * 0.5f;
                     if (pipeOutPosField != null) pipeOutPosField.SetValue(pipe, outPos);
-                    if (pipeOutSizeField != null) pipeOutSizeField.SetValue(pipe, outSize);
+                    if (pipeOutSizeField != null) pipeOutSizeField.SetValue(pipe, scaledOutSize);
+                    Jotunn.Logger.LogInfo($"Scaled Pipe outSize on {prefab.name}: outSize={scaledOutSize}");
+                } else {
+                    Pipe pipe = prefab.GetComponent<Pipe>();
+                    if (pipe != null) {
+                        FieldInfo pipeOutSizeField = typeof(Pipe).GetField("outSize", BindingFlags.NonPublic | BindingFlags.Instance);
+                        if (pipeOutSizeField != null) {
+                            Vector3 outSize = (Vector3)pipeOutSizeField.GetValue(pipe);
+                            Vector3 scaledOutSize = outSize * 0.5f;
+                            pipeOutSizeField.SetValue(pipe, scaledOutSize);
+                            Jotunn.Logger.LogInfo($"Scaled Pipe outSize on {prefab.name}: outSize={scaledOutSize}");
+                        }
+                    }
                 }
-            } else if (prefab.name.Contains("Hopper") && prefab.GetComponent<Hopper>() == null) {
-                prefab.AddComponent<Hopper>();
+            } else if (prefab.name.Contains("Hopper")) {
+                Hopper hopper = prefab.GetComponent<Hopper>();
+                if (hopper == null) {
+                    hopper = prefab.AddComponent<Hopper>();
+                }
                 if (prefab.GetComponent<Pipe>() != null) {
                     DestroyImmediate(prefab.GetComponent<Pipe>());
+                }
+                if (hopper != null) {
+                    FieldInfo inSizeField = typeof(Hopper).GetField("inSize", BindingFlags.NonPublic | BindingFlags.Instance);
+                    FieldInfo outSizeField = typeof(Hopper).GetField("outSize", BindingFlags.NonPublic | BindingFlags.Instance);
+                    if (inSizeField != null && outSizeField != null) {
+                        Vector3 inSize = (Vector3)inSizeField.GetValue(hopper);
+                        Vector3 outSize = (Vector3)outSizeField.GetValue(hopper);
+                        Vector3 scaledInSize = inSize * 0.5f;
+                        Vector3 scaledOutSize = outSize * 0.5f;
+                        inSizeField.SetValue(hopper, scaledInSize);
+                        outSizeField.SetValue(hopper, scaledOutSize);
+                        Jotunn.Logger.LogInfo($"Scaled Hopper boxes on {prefab.name}: inSize={scaledInSize}, outSize={scaledOutSize}");
+                    }
                 }
             }
         }
