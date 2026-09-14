@@ -141,10 +141,14 @@ namespace ValheimPipes.UI {
                 return;
             }
 
-            // CLEANUP: UI prefabs should not have ZNetView. Remove it from the prefab before instantiating
-            // to prevent AzuDevMod or Valheim from complaining about unregistered views.
+            // CLEANUP: UI prefabs should not have ZNetView or Container components.
+            // Remove them from the prefab before instantiating to prevent other mods
+            // (such as AzuCraftyBoxes or QuickStack) from hooking into them or Valheim complaining.
             foreach (var nv in prefab.GetComponentsInChildren<ZNetView>(true)) {
                 DestroyImmediate(nv, true);
+            }
+            foreach (var c in prefab.GetComponentsInChildren<Container>(true)) {
+                DestroyImmediate(c, true);
             }
  
             uiInstance = Instantiate(prefab, parent, false);
@@ -219,16 +223,7 @@ namespace ValheimPipes.UI {
             target = hopper;
             target.LoadFilterInventory();
             
-            if (filterContainer == null) {
-                // Fallback: Try to find it by component if the serialize field is not set
-                filterContainer = GetComponentInChildren<Container>(true);
-                
-                if (filterContainer == null) {
-                    Jotunn.Logger.LogWarning("HopperUI: filterContainer is null and could not be found in children! Please check the prefab assignment.");
-                } else {
-                    Jotunn.Logger.LogInfo("HopperUI: Successfully found filterContainer in children.");
-                }
-            }
+
             
             SetGUIState(true);
             UpdateText();
@@ -299,10 +294,19 @@ namespace ValheimPipes.UI {
             return null;
         }
 
+        private static GameObject FindTooltipPrefab() {
+            InventoryGui gui = InventoryGui.instance;
+            if (gui == null) return null;
+
+            var tt = gui.GetComponentsInChildren<UITooltip>(true).FirstOrDefault(t => t.m_tooltipPrefab != null);
+            return tt != null ? tt.m_tooltipPrefab : null;
+        }
+
         private void SetupFilterSlots() {
             if (uiRoot == null) return;
 
             Sprite slotBkgSprite = FindSlotBackgroundSprite();
+            GameObject tooltipPrefab = FindTooltipPrefab();
             Color defaultColor = new Color(0f, 0f, 0f, 0.45f);
 
             for (int i = 0; i < 3; i++) {
@@ -353,6 +357,8 @@ namespace ValheimPipes.UI {
                 // UITooltip
                 UITooltip tooltip = slotGo.GetComponent<UITooltip>();
                 if (tooltip == null) tooltip = slotGo.AddComponent<UITooltip>();
+                if (tooltipPrefab != null) tooltip.m_tooltipPrefab = tooltipPrefab;
+                tooltip.enabled = false;
 
                 // Click / Drop / Hover handler
                 int slotIdx = i;
@@ -377,6 +383,7 @@ namespace ValheimPipes.UI {
             if (target == null) return;
 
             if (button == PointerEventData.InputButton.Right) {
+                UITooltip.HideTooltip();
                 target.ClearFilterItem(slotIndex);
                 UpdateFilterSlots();
                 return;
@@ -387,6 +394,7 @@ namespace ValheimPipes.UI {
                 if (gui != null && gui.m_dragItem != null) {
                     target.SetFilterItem(slotIndex, gui.m_dragItem);
                 } else {
+                    UITooltip.HideTooltip();
                     target.ClearFilterItem(slotIndex);
                 }
                 UpdateFilterSlots();
@@ -419,15 +427,21 @@ namespace ValheimPipes.UI {
                     slot.IconImage.color = Color.white;
                     slot.IconImage.enabled = true;
                     if (slot.Tooltip != null) {
+                        if (slot.Tooltip.m_tooltipPrefab == null) {
+                            slot.Tooltip.m_tooltipPrefab = FindTooltipPrefab();
+                        }
                         slot.Tooltip.m_topic = "";
                         slot.Tooltip.m_text = item.m_shared != null ? Localization.instance.Localize(item.m_shared.m_name) : "";
+                        slot.Tooltip.enabled = slot.Tooltip.m_tooltipPrefab != null;
                     }
                 } else {
                     slot.IconImage.sprite = null;
                     slot.IconImage.enabled = false;
                     if (slot.Tooltip != null) {
+                        UITooltip.HideTooltip();
                         slot.Tooltip.m_topic = "";
                         slot.Tooltip.m_text = "";
+                        slot.Tooltip.enabled = false;
                     }
                 }
             }

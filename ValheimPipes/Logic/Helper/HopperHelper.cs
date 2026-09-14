@@ -121,5 +121,10 @@ namespace ValheimPipes.Logic.Helper {
             }
             return destinationContainer.GetInventory().AddItem(clone);
         }
+
+        public static bool RemoveItemDirect(this Container sourceContainer, ItemDrop.ItemData item, int amount) {
+            if (sourceContainer == null || sourceContainer.GetInventory() == null) return false;
+            return sourceContainer.GetInventory().RemoveItem(item, amount);
+        }
     }
 }

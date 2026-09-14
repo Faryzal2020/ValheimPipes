@@ -144,12 +144,12 @@ namespace ValheimPipes.Logic {
         }
 
         public void AddItem(ItemDrop.ItemData item, Container sourceContainer, ZDOID sender, int amount = 1) {
-            sourceContainer.RemoveItemFromChest(item, null, new Vector2i(-1, -1), sender, amount);
+            sourceContainer.RemoveItemDirect(item, amount);
 
             if (IsFuelItem(item)) {
                 cookingStation.m_nview.InvokeRPC("RPC_AddFuel");
             } else {
-                cookingStation.m_nview.InvokeRPC("RPC_AddItem", item.m_dropPrefab.name);
+                cookingStation.m_nview.InvokeRPC("RPC_AddItem", item.m_dropPrefab.name, false);
             }
         }
 

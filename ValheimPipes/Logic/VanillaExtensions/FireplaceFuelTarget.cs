@@ -26,7 +26,7 @@ namespace ValheimPipes.Logic {
 
             if (toAdd <= 0) return;
 
-            sourceContainer.RemoveItemFromChest(item, null, new Vector2i(-1, -1), sender, toAdd);
+            sourceContainer.RemoveItemDirect(item, toAdd);
 
             for (int i = 0; i < toAdd; i++) {
                 fireplace.m_nview.InvokeRPC("RPC_AddFuel");

@@ -13,6 +13,10 @@
     </RestoreAdditionalProjectSources>
     <RootNamespace>ValheimPipes</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <EnableSourceLink>false</EnableSourceLink>
+    <EnableSourceControlManagerQueries>false</EnableSourceControlManagerQueries>
+    <PathMap>$(MSBuildProjectDirectory)=/ValheimPipes,$(UserProfile)=/User</PathMap>
   </PropertyGroup>
 
   <ItemGroup>
