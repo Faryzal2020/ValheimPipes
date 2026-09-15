@@ -1,5 +1,8 @@
 # Changelog
- 
+
+1.2.2
+Minor fixes
+
 1.2.1
 - Added Bronze and Iron Sideways Hoppers with dedicated icons.
 

@@ -22,7 +22,7 @@ namespace ValheimPipes {
     public class Plugin : BaseUnityPlugin {
         [PublicAPI] public const string ModName = "ValheimPipes";
         [PublicAPI] public const string ModGuid = "com.faryzal2020.valheim.ValheimPipes";
-        [PublicAPI] public const string ModVersion = "1.2.1";
+        [PublicAPI] public const string ModVersion = "1.2.2";
 
         private static ConfigEntry<bool> addSmelterSnappoints;
         private static ConfigEntry<bool> debugLogs;
