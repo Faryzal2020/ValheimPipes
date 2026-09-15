@@ -22,7 +22,7 @@ namespace ValheimPipes {
     public class Plugin : BaseUnityPlugin {
         [PublicAPI] public const string ModName = "ValheimPipes";
         [PublicAPI] public const string ModGuid = "com.faryzal2020.valheim.ValheimPipes";
-        [PublicAPI] public const string ModVersion = "1.1.1";
+        [PublicAPI] public const string ModVersion = "1.2.0";
 
         private static ConfigEntry<bool> addSmelterSnappoints;
         private static ConfigEntry<bool> debugLogs;
@@ -102,6 +102,16 @@ namespace ValheimPipes {
             AddBronzePiece("MS_PipeBronze_Diagonal_26_Down_4m", 4, 2);
             AddIronPiece("HopperIronDown", 6, 2);
             AddIronPiece("HopperIronSide", 6, 2);
+            AddIronPiece("MS_PipeIronSide", 4, 2);
+            AddIronPiece("MS_PipeIronSide_2m", 2, 1);
+            AddIronPiece("MS_PipeIron_Vertical_Up_4m", 4, 2);
+            AddIronPiece("MS_PipeIron_Vertical_Down_4m", 4, 2);
+            AddIronPiece("MS_PipeIron_Vertical_Up_2m", 2, 1);
+            AddIronPiece("MS_PipeIron_Vertical_Down_2m", 2, 1);
+            AddIronPiece("MS_PipeIron_Diagonal_45_Up_4m", 4, 2);
+            AddIronPiece("MS_PipeIron_Diagonal_45_Down_4m", 4, 2);
+            AddIronPiece("MS_PipeIron_Diagonal_26_Up_4m", 4, 2);
+            AddIronPiece("MS_PipeIron_Diagonal_26_Down_4m", 4, 2);
 
             PrefabManager.OnVanillaPrefabsAvailable += AddSnappoints;
         }

@@ -25,6 +25,16 @@ Different hopper types are available, all can be found in the hammer crafting ta
 | <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Diagonal_45_Down_4m.png" /> | Bronze pipe down 45° | 4 wood, 2 bronze nails |
 | <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Iron_V.png" />                         | Iron hopper          | 6 wood, 2 iron nails   |
 | <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Iron_H.png" />                         | Iron side hopper     | 6 wood, 2 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Horizontal_4m.png" />         | Iron pipe 4m         | 4 wood, 2 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Horizontal_2m.png" />         | Iron pipe 2m         | 2 wood, 1 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Vertical_Up_4m.png" />        | Iron pipe up 4m      | 4 wood, 2 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Vertical_Up_2m.png" />        | Iron pipe up 2m      | 2 wood, 1 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Vertical_Down_4m.png" />      | Iron pipe down 4m    | 4 wood, 2 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Vertical_Down_2m.png" />      | Iron pipe down 2m    | 2 wood, 1 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Diagonal_26_Up_4m.png" />     | Iron pipe up 26°     | 4 wood, 2 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Diagonal_26_Down_4m.png" />   | Iron pipe down 26°   | 4 wood, 2 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Diagonal_45_Up_4m.png" />     | Iron pipe up 45°     | 4 wood, 2 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Diagonal_45_Down_4m.png" />   | Iron pipe down 45°   | 4 wood, 2 iron nails   |
 
 Bronze hoppers and pipes have a transfer speed of 60 items per minute (1/sec).
 Iron hoppers and pipes have a transfer speed of 120 items per minute (2/sec).

@@ -1,7 +1,10 @@
 # Changelog
 
+1.2.0
+- Added Tier 2 Iron Pipes (10 variants) with custom iron edge trims and icons, running at the iron transfer rate (120 items/min).
+
 1.1.1
-Fixed errors related to Azucrafty and interaction with smelters
+- Fixed errors related to Azucrafty and interaction with smelters
 
 1.1.0
 - Initial Stable Release for Valheim 1.0.
