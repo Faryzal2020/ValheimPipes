@@ -1,0 +1,39 @@
+[config]
+schemaVersion = "0.0.1"
+
+[package]
+namespace = "coolkidsclub"
+name = "ValheimPipes"
+versionNumber = "1.2.2"
+description = "Adds hoppers and pipes to transport items (Forked from ItemHopper by MSchmoecker)"
+websiteUrl = "https://github.com/Faryzal2020/ValheimPipes"
+containsNsfwContent = false
+
+[package.dependencies]
+denikson-BepInExPack_Valheim = "5.4.2202"
+ValheimModding-Jotunn = "2.30.0"
+MSchmoecker-MultiUserChest = "0.6.2"
+
+[build]
+icon = "./icon.png"
+readme = "./README.md"
+outdir = "./dist"
+
+[[build.copy]]
+source = "./ValheimPipes/bin/Debug/net472/ValheimPipes.dll"
+target = "ValheimPipes.dll"
+
+[[build.copy]]
+source = "./ValheimPipes/bin/Debug/net472/ValheimPipes.pdb"
+target = "ValheimPipes.pdb"
+
+[[build.copy]]
+source = "./CHANGELOG.md"
+target = "CHANGELOG.md"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = [ "valheim", ]
+
+[publish.categories]
+valheim = [ "building", "transportation", "tools", ]
