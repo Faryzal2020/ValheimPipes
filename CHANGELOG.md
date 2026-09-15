@@ -1,4 +1,7 @@
 # Changelog
+ 
+1.2.1
+- Added Bronze and Iron Sideways Hoppers with dedicated icons.
 
 1.2.0
 - Added Tier 2 Iron Pipes (10 variants) with custom iron edge trims and icons, running at the iron transfer rate (120 items/min).

@@ -889,6 +889,7 @@ MonoBehaviour:
   m_description: 
   m_enabled: 1
   m_category: 0
+  m_usage: 0
   m_isUpgrade: 0
   m_comfort: 0
   m_comfortGroup: 0
@@ -908,6 +909,8 @@ MonoBehaviour:
   m_noClipping: 0
   m_onlyInTeleportArea: 0
   m_allowedInDungeons: 0
+  m_allowedInDeepSnow: 0
+  m_requireDeepSnow: 0
   m_spaceRequirement: 0
   m_repairPiece: 0
   m_removePiece: 0
@@ -975,8 +978,13 @@ MonoBehaviour:
   m_worn: {fileID: 0}
   m_broken: {fileID: 0}
   m_wet: {fileID: 0}
+  m_snow: {fileID: 0}
+  m_snowWorn: {fileID: 0}
+  m_snowBroken: {fileID: 0}
   m_noRoofWear: 0
+  m_roofCheckOffset: 0
   m_noSupportWear: 1
+  m_snowDamageImmune: 0
   m_ashDamageImmune: 0
   m_ashDamageResist: 0
   m_burnable: 1
@@ -986,6 +994,13 @@ MonoBehaviour:
   m_forceCorrectCOMCalculation: 0
   m_staticPosition: 1
   m_nonSolidRenderers: []
+  m_requiredPersistentEvent: 
+  m_takeDamageIfInsideEvent: 0
+  m_eventDamage: 25
+  m_eventDamageDeviation: 10
+  m_snowBuildup: 0
+  m_requiredBiome: 0
+  m_outsideRequiredBiomeDamage: 25
   m_health: 100
   m_damages:
     m_blunt: 0
@@ -998,6 +1013,7 @@ MonoBehaviour:
     m_lightning: 0
     m_poison: 0
     m_spirit: 0
+    m_nonPlayer: 0
   m_minToolTier: 0
   m_hitNoise: 0
   m_destroyNoise: 0
@@ -1080,3 +1096,5 @@ MonoBehaviour:
   m_rootObjectOverride: {fileID: 0}
   m_wagon: {fileID: 0}
   m_destroyedLootPrefab: {fileID: 0}
+  m_hoverOffset: 0
+  m_discoverStat: 206

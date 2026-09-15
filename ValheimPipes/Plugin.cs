@@ -22,7 +22,7 @@ namespace ValheimPipes {
     public class Plugin : BaseUnityPlugin {
         [PublicAPI] public const string ModName = "ValheimPipes";
         [PublicAPI] public const string ModGuid = "com.faryzal2020.valheim.ValheimPipes";
-        [PublicAPI] public const string ModVersion = "1.2.0";
+        [PublicAPI] public const string ModVersion = "1.2.1";
 
         private static ConfigEntry<bool> addSmelterSnappoints;
         private static ConfigEntry<bool> debugLogs;
@@ -90,6 +90,7 @@ namespace ValheimPipes {
 
             AddBronzePiece("HopperBronzeDown", 6, 4);
             AddBronzePiece("HopperBronzeSide", 6, 4);
+            AddBronzePiece("HopperBronzeSideways", 6, 4);
             AddBronzePiece("MS_PipeBronzeSide", 4, 2);
             AddBronzePiece("MS_PipeBronzeSide_2m", 2, 1);
             AddBronzePiece("MS_PipeBronze_Vertical_Up_4m", 4, 2);
@@ -102,6 +103,7 @@ namespace ValheimPipes {
             AddBronzePiece("MS_PipeBronze_Diagonal_26_Down_4m", 4, 2);
             AddIronPiece("HopperIronDown", 6, 2);
             AddIronPiece("HopperIronSide", 6, 2);
+            AddIronPiece("HopperIronSideways", 6, 2);
             AddIronPiece("MS_PipeIronSide", 4, 2);
             AddIronPiece("MS_PipeIronSide_2m", 2, 1);
             AddIronPiece("MS_PipeIron_Vertical_Up_4m", 4, 2);

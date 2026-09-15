@@ -1,8 +1,8 @@
 # Valheim Pipes
 ## About
-This is a fork of MSchmoecker's [ItemHopper](https://valheim.thunderstore.io/package/MSchmoecker/ItemHopper/) with several improvements and features. The concept, model, and all the base components of the codes belong to MSchmoecker and Bento#5066!
+This is a fork of MSchmoecker's [ItemHopper](https://valheim.thunderstore.io/package/MSchmoecker/ItemHopper/) with several improvements and features. The concept, model, and all the base components of the codes belong to MSchmoecker and Bento#5066! Released under different name with permission from the original author. A big thanks to MSchmoecker for being open to the idea of releasing a fork of his mod!
 
-The main difference is the improved item distribution algorithm. Where the original mod could be a bit unpredictable with throughput splitting, this fork uses monitored output neighbors scanning from the pipe to handle the push instead of asynchronous transfers between all the push/pulls from each hopper and pipes to make it more consistent and reliable.
+The main difference is the improved item distribution algorithm. Where the original mod could be a bit unpredictable with throughput splitting, this fork uses monitored output neighbors scanning from the pipe to handle the push instead of asynchronous transfers between all the push/pulls from each hopper and pipes to make it more consistent and reliable. Another difference is the addition of iron pipes, sideways hoppers, and ability to change the rate of transfer in the config (albeit considered as balance-changing)
 
 
 ## Features
@@ -11,20 +11,22 @@ Different hopper types are available, all can be found in the hammer crafting ta
 
 | Icon                                                                                                                                                 | Name                 | Cost                   |
 |------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------|------------------------|
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Wood_V.png" />                         | Bronze hopper        | 6 wood, 4 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Wood_H.png" />                         | Bronze side hopper   | 6 wood, 4 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Horizontal_4m.png" />       | Bronze pipe 4m       | 4 wood, 2 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Horizontal_2m.png" />       | Bronze pipe 2m       | 2 wood, 1 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Vertical_Up_4m.png" />      | Bronze pipe up 4m    | 4 wood, 2 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Vertical_Up_2m.png" />      | Bronze pipe up 2m    | 2 wood, 1 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Vertical_Down_4m.png" />    | Bronze pipe down 4m  | 4 wood, 2 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Vertical_Down_2m.png" />    | Bronze pipe down 2m  | 2 wood, 1 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Diagonal_26_Up_4m.png" />   | Bronze pipe up 26°   | 4 wood, 2 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Diagonal_26_Down_4m.png" /> | Bronze pipe down 26° | 4 wood, 2 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Diagonal_45_Up_4m.png" />   | Bronze pipe up 45°   | 4 wood, 2 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Diagonal_45_Down_4m.png" /> | Bronze pipe down 45° | 4 wood, 2 bronze nails |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Iron_V.png" />                         | Iron hopper          | 6 wood, 2 iron nails   |
-| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Iron_H.png" />                         | Iron side hopper     | 6 wood, 2 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Wood_V.png" />                         | Bronze hopper          | 6 wood, 4 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Wood_H.png" />                         | Bronze side hopper     | 6 wood, 4 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Wood_H.png" />                         | Bronze sideways hopper | 6 wood, 4 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Horizontal_4m.png" />       | Bronze pipe 4m         | 4 wood, 2 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Horizontal_2m.png" />       | Bronze pipe 2m         | 2 wood, 1 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Vertical_Up_4m.png" />      | Bronze pipe up 4m      | 4 wood, 2 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Vertical_Up_2m.png" />      | Bronze pipe up 2m      | 2 wood, 1 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Vertical_Down_4m.png" />    | Bronze pipe down 4m    | 4 wood, 2 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Vertical_Down_2m.png" />    | Bronze pipe down 2m    | 2 wood, 1 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Diagonal_26_Up_4m.png" />   | Bronze pipe up 26°     | 4 wood, 2 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Diagonal_26_Down_4m.png" /> | Bronze pipe down 26°   | 4 wood, 2 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Diagonal_45_Up_4m.png" />   | Bronze pipe up 45°     | 4 wood, 2 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeBronze_Diagonal_45_Down_4m.png" /> | Bronze pipe down 45°   | 4 wood, 2 bronze nails |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Iron_V.png" />                         | Iron hopper            | 6 wood, 2 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Iron_H.png" />                         | Iron side hopper       | 6 wood, 2 iron nails   |
+| <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/Iron_H.png" />                         | Iron sideways hopper   | 6 wood, 2 iron nails   |
 | <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Horizontal_4m.png" />         | Iron pipe 4m         | 4 wood, 2 iron nails   |
 | <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Horizontal_2m.png" />         | Iron pipe 2m         | 2 wood, 1 iron nails   |
 | <img width="46" alt="icon" src="https://raw.githubusercontent.com/Faryzal2020/ValheimHopper/master/Docs/Icons/PipeIron_Vertical_Up_4m.png" />        | Iron pipe up 4m      | 4 wood, 2 iron nails   |

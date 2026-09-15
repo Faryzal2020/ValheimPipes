@@ -1,8 +1,10 @@
 {
   "piece_hopper_bronze_down": "Bronze Hopper",
   "piece_hopper_bronze_side": "Bronze Side Hopper",
+  "piece_hopper_bronze_sideways": "Bronze Sideways Hopper",
   "piece_hopper_iron_down": "Iron Hopper",
   "piece_hopper_iron_side": "Iron Side Hopper",
+  "piece_hopper_iron_sideways": "Iron Sideways Hopper",
   "piece_pipe_bronze_horizontal_4m": "Bronze pipe 4m",
   "piece_pipe_bronze_horizontal_2m": "Bronze pipe 2m",
   "piece_pipe_bronze_vertical_up_4m": "Bronze pipe up 4m",

@@ -1,8 +1,10 @@
 {
   "piece_hopper_bronze_down": "Bronze Trichter",
   "piece_hopper_bronze_side": "Bronze Seitentrichter",
+  "piece_hopper_bronze_sideways": "Bronze Seitwärtstrichter",
   "piece_hopper_iron_down": "Eisen Trichter",
   "piece_hopper_iron_side": "Eisen Seitentrichter",
+  "piece_hopper_iron_sideways": "Eisen Seitwärtstrichter",
   "piece_pipe_bronze_horizontal_4m": "Bronze Rohr 4m",
   "piece_pipe_bronze_horizontal_2m": "Bronze Rohr 2m",
   "piece_pipe_bronze_vertical_up_4m": "Bronze Rohr nach oben 4m",

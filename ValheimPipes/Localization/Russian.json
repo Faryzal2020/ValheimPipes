@@ -1,8 +1,10 @@
 {
   "piece_hopper_bronze_down": "Бронзовая приемная воронка",
   "piece_hopper_bronze_side": "Бронзовая боковая приемная воронка",
+  "piece_hopper_bronze_sideways": "Бронзовая горизонтальная приемная воронка",
   "piece_hopper_iron_down": "Железная приемная воронка",
   "piece_hopper_iron_side": "Железная боковая приемная воронка",
+  "piece_hopper_iron_sideways": "Железная горизонтальная приемная воронка",
   "piece_pipe_bronze_horizontal_4m": "Бронзовая труба 4м",
   "piece_pipe_bronze_horizontal_2m": "Бронзовая труба 2м",
   "piece_pipe_bronze_vertical_up_4m": "Бронзовая труба вверх на 4м",
